@@ -87,18 +87,20 @@
     position: absolute;
     top: 100%;
     left: 50%;
-    width: 4.5vh;
-    height: 4.5vh;
     border-radius: 50%;
     background-color: inherit;
 }
 
 .analog-clock-mm::after {
     transform: translate(-50%, calc(-50% - var(--hand_hm_t)));
+    width: 4.2vh;
+    height: 4.2vh;
 }
 
 .analog-clock-ss::after {
     transform: translate(-50%, calc(-50% - var(--hand_s_t)));
+    width: 4.5vh;
+    height: 4.5vh;
 }
 
 .analog-clock-tick {
