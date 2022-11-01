@@ -95,6 +95,8 @@
 
 .analog-clock-mm::after {
     transform: translate(-50%, calc(-50% - var(--hand_hm_t)));
+    width: 4.3vh;
+    height: 4.3vh;
 }
 
 .analog-clock-ss::after {
