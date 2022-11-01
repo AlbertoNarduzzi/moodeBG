@@ -36,7 +36,7 @@ switch ($option) {
 		restartBluetooth();
 		break;
 	case '--airplay':
-		restartAirplay();
+		restartAirPlay();
 		break;
 	case '--spotify':
 		restartSpotify();
@@ -78,12 +78,15 @@ function restartBluetooth() {
 
 	// Restore MPD volume and start bluetooth
 	sysCmd('/var/www/vol.sh -restore');
-	startBluetooth();
+	$status = startBluetooth();
+	if ($status != 'started') {
+		echo $status;
+	}
 }
 
-function restartAirplay() {
-	stopAirplay();
-	startAirplay();
+function restartAirPlay() {
+	stopAirPlay();
+	startAirPlay();
 }
 
 function restartSpotify() {

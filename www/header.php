@@ -47,8 +47,11 @@
     <link href="css/jquery.pnotify.default.css" rel="stylesheet">
     <link href="css/fontawesome-moode.css" rel="stylesheet">
     <link href="css/panels.css" rel="stylesheet">
+    <link href="css/configs.css" rel="stylesheet">
     <link href="css/moode.css" rel="stylesheet">
+    <link href="css/media.css" rel="stylesheet">
     <link href="css/osk.css" rel="stylesheet">
+    <link href="css/analog-clock.css" rel="stylesheet">
 	<!-- endbuild -->
 
 	<!-- Common JS -->
@@ -72,6 +75,7 @@
     <script src="js/playerlib.js" defer></script>
     <script src="js/links.js" defer></script>
     <script src="js/osk.js" defer></script>
+    <script src="js/analog-clock.js" defer></script>
 	<!-- endbuild -->
 
     <!-- Playback / Library -->
@@ -152,7 +156,7 @@
     </div>
 
 	<!-- HEADER -->
-	<div id="menu-top" class="ui-header ui-bar-f ui-header-fixed slidedown" data-position="fixed" data-role="header" role="banner">
+	<div id="panel-header" class="ui-header ui-bar-f ui-header-fixed slidedown" data-position="fixed" data-role="header" role="banner">
 		<div aria-label="Switch to Playbar" id="playback-switch"><div></div></div>
 
 		<div id="config-back">
@@ -167,7 +171,7 @@
             <a id="ren-config-btn" class="btn" href="ren-config.php">Renderers</a>
 		</div>
 
-		<div id="menu-header"></div>
+		<div id="library-header"></div>
         <div id="multiroom-sender" class="context-menu"><a class="btn" href="#notarget" data-cmd="multiroom_rx_modal"><i class="fas fa-rss"></i></a></div>
 
 		<?php
@@ -222,13 +226,13 @@
 				<?php } ?>
 			</ul>
 		</div>
-		<div class="menu-top">
+		<div class="panel-header">
 			<span aria-label="Clock Radio" id="clockradio-icon" class="clockradio-off">•</span>
 		</div>
 	</div>
 
 	<!-- PLAYBAR -->
-	<div id="menu-bottom" class="btn-group btn-list ui-footer ui-bar-f ui-footer-fixed slidedown" data-position="fixed" data-role="footer" role="banner">
+	<div id="panel-footer" class="btn-group btn-list ui-footer ui-bar-f ui-footer-fixed slidedown" data-position="fixed" data-role="footer" role="banner">
 		<div id="playbar">
 			<div aria-label="Cover" id="playbar-cover"></div>
 			<div aria-label="First use help" id="playbar-firstuse-help"><div></div></div>

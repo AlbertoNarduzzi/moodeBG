@@ -27,22 +27,26 @@ require_once __DIR__ . '/sql.php';
 function startBluetooth() {
 	sysCmd('systemctl start hciuart');
 	sysCmd('systemctl start bluetooth');
-	sysCmd('systemctl start bluealsa');
 
-	// We should have a MAC address
-	$result = sysCmd('ls /var/lib/bluetooth');
-	if ($result[0] == '') {
-		workerLog('startBluetooth(): Bluetooth error, no MAC address');
+	$result = sysCmd('pgrep bluetoothd');
+	if (empty($result)) {
+		$status = 'Error: Unable to start Bluetooth';
+	} else {
+		$result = sysCmd('ls /var/lib/bluetooth');
+		if (empty($result)) {
+			$status = 'Error: No MAC address found for Bluetooth controller';
+		} else {
+			sysCmd('systemctl start bluealsa');
+			sysCmd('/var/www/util/blu-control.sh -i');
+			$status = 'started';
+		}
 	}
-	// Initialize controller
-	else {
-		$result = sysCmd('/var/www/util/blu-control.sh -i');
-		//workerLog('startBluetooth(): Bluetooth controller initialized');
-	}
+
+	return $status;
 }
 
-function startAirplay() {
-	if (getAirplayProtocolVer() == '2') {
+function startAirPlay() {
+	if (getAirPlayProtocolVer() == '2') {
 		sysCmd('systemctl start nqptp');
 	}
 
@@ -65,14 +69,14 @@ function startAirplay() {
 		' -a "' . $_SESSION['airplayname'] . '" ' .
 		'-- -d ' . $device . ' > ' . $logFile . ' 2>&1 &';
 
-	debugLog('startAirplay(): (' . $cmd . ')');
+	debugLog('startAirPlay(): (' . $cmd . ')');
 	sysCmd($cmd);
 }
 
-function stopAirplay() {
+function stopAirPlay() {
 	sysCmd('killall shairport-sync');
 
-	if (getAirplayProtocolVer() == '2') {
+	if (getAirPlayProtocolVer() == '2') {
 		sysCmd('systemctl stop nqptp');
 	}
 
@@ -90,7 +94,7 @@ function stopAirplay() {
 	sendEngCmd('aplactive0');
 }
 
-function getAirplayProtocolVer() {
+function getAirPlayProtocolVer() {
 	return empty(sysCmd('shairport-sync -V | grep "AirPlay2"')) ? '1' : '2';
 }
 
