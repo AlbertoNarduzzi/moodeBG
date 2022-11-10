@@ -144,7 +144,8 @@ var GLOBAL = {
     busySpinnerSVG: "<svg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 42 42' stroke='#fff'><g fill='none' fill-rule='evenodd'><g transform='translate(3 3)' stroke-width='4'><circle stroke-opacity='.35' cx='18' cy='18' r='18'/><path d='M36 18c0-9.94-8.06-18-18-18'><animateTransform attributeName='transform' type='rotate' from='0 18 18' to='360 18 18' dur='1s' repeatCount='indefinite'/></path></g></g></svg>",
     thisClientIP: '',
     chromium: false,
-    ssClockIntervalID: ''
+    ssClockIntervalID: '',
+    reconnecting: false
 };
 GLOBAL.allFilters = GLOBAL.oneArgFilters.concat(GLOBAL.twoArgFilters);
 
@@ -306,8 +307,14 @@ function engineMpd() {
 				// JSON parse errors @ohinckel https: //github.com/moode-player/moode/pull/14/files
 				if (typeof(MPD.json['error']) == 'object') {
                     var errorCode = typeof(MPD.json['error']['code']) === 'undefined' ? '' : ' (' + MPD.json['error']['code'] + ')';
-                    // This particular EOF error occurs when client is simply trying to reconnect
-                    if (MPD.json['error']['message'] != 'JSON Parse error: Unexpected EOF') {
+                    // These particular errors occur when front-end is simply trying to reconnect
+                    if (MPD.json['error']['message'] == 'JSON Parse error: Unexpected EOF' ||
+                        MPD.json['error']['message'] == 'Unexpected end of JSON input') {
+                        if (!GLOBAL.reconnecting) {
+                            notify('reconnect', '', 'infinite');
+                            GLOBAL.reconnecting = true;
+                        }
+                    } else {
                         notify('mpderror', MPD.json['error']['message'] + errorCode);
                     }
 				}
@@ -343,8 +350,10 @@ function engineMpd() {
                 if (data['statusText'] == 'error' && data['readyState'] == 0) {
 			        renderReconnect();
 				}
+
 				MPD.json['state'] = 'reconnect';
-				engineMpd();
+
+                engineMpd();
 			}, ENGINE_TIMEOUT);
 		}
     });
@@ -359,7 +368,7 @@ function engineMpdLite() {
 		async: true,
 		cache: false,
 		success: function(data) {
-			//debugLog('engineMpdLite(): success branch: data=(' + data + ')');
+			debugLog('engineMpdLite(): success branch: data=(' + data + ')');
 
 			// Always have valid json
 			try {
@@ -398,7 +407,22 @@ function engineMpdLite() {
         			        renderReconnect();
         				}
                     }
+
     				MPD.json['state'] = 'reconnect';
+
+                    if (typeof(MPD.json['error']) == 'object') {
+                        var errorCode = typeof(MPD.json['error']['code']) === 'undefined' ? '' : ' (' + MPD.json['error']['code'] + ')';
+                        // These particular errors occur when front-end is simply trying to reconnect
+                        if (MPD.json['error']['message'] == 'JSON Parse error: Unexpected EOF' ||
+                            MPD.json['error']['message'] == 'Unexpected end of JSON input') {
+                            if (!GLOBAL.reconnecting) {
+                                notify('reconnect', '', 'infinite');
+                                GLOBAL.reconnecting = true;
+                            }
+                        } else {
+                            notify('mpderror', MPD.json['error']['message'] + errorCode);
+                        }
+    				}
 
 					engineMpdLite();
 				}, ENGINE_TIMEOUT);
@@ -415,8 +439,10 @@ function engineMpdLite() {
     			        renderReconnect();
     				}
                 }
+
 				MPD.json['state'] = 'reconnect';
-				engineMpdLite();
+
+                engineMpdLite();
 			}, ENGINE_TIMEOUT);
 		}
     });
@@ -447,7 +473,7 @@ function engineCmd() {
                 case 'btactive1':
                 case 'btactive0':
                     // NOTE: cmd[1] is the input source name
-                    inpSrcIndicator(cmd[0], 'Bluetooth Active' + cmd[1] + '<br><a class="btn configure-renderer" href="blu-config.php">BlueZ Config</a>');
+                    inpSrcIndicator(cmd[0], 'Bluetooth Active' + cmd[1] + '<br><a class="btn configure-renderer" href="blu-config.php">Bluetooth Control</a>');
                     break;
                 case 'aplactive1':
                 case 'aplactive0':
@@ -502,7 +528,7 @@ function engineCmd() {
                     console.log(cmd[0]);
                     break;
                 default:
-                    console.log(cmd[0]);
+                    console.log('engineCmd(): ' + cmd[0]);
                     break;
             }
 
@@ -541,8 +567,13 @@ function engineCmdLite() {
                     // causing engine-cmd.php to start releasing idle connections
                     console.log(cmd[0]);
                     break;
+                case 'refresh_screen':
+                    setTimeout(function() {
+                        location.reload(true);
+                    }, DEFAULT_TIMEOUT);
+                    break;
                 default:
-                    console.log(cmd[0]);
+                    console.log('engineCmdLite(): ' + cmd[0]);
                     break;
             }
 
@@ -696,7 +727,9 @@ function renderReconnect() {
 		$('#reconnect').show();
 	}
 
-	$('#countdown-display').countdown('pause');
+    if (GLOBAL.scriptSection == 'panels') {
+        $('#countdown-display').countdown('pause');
+    }
 
 	window.clearInterval(UI.knob);
 	UI.hideReconnect = true;
@@ -1045,7 +1078,7 @@ function renderUI() {
     	}
     	// Bluetooth renderer
     	if (SESSION.json['btactive'] == '1') {
-    		inpSrcIndicator('btactive1', 'Bluetooth Active' + '<br><a class="btn configure-renderer" href="blu-config.php">BlueZ Config</a>');
+    		inpSrcIndicator('btactive1', 'Bluetooth Active' + '<br><a class="btn configure-renderer" href="blu-config.php">Bluetooth Control</a>');
      	}
     	// AirPlay renderer
     	if (SESSION.json['aplactive'] == '1') {
@@ -1430,6 +1463,10 @@ function renderFolderView(data, path, searchstr) {
 	var no_art = true;
 
 	for (i = 0; i < data.length; i++) {
+		// chosing to have MPD ignore CUE parsing means that the folder contents will include them, so here we must ignore them too.
+		if (SESSION.json['cuefiles_ignore'] == '1' && data[i].file && data[i].file.endsWith('.cue')) {
+			continue;
+		}
     	if (data[i].directory) {
             // var cueVirtualDir = false;
             // Flag cue virtual directory
@@ -1489,7 +1526,7 @@ function renderFolderView(data, path, searchstr) {
     			output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].file + '">';
     			output += '<div class="db-icon db-song db-action">'; // Hack to enable entire line click for context menu
     			output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-folder-item">';
-                output += data[i].Track + '</a></div>';
+                output += (data[i].Track ? data[i].Track : "•") + '</a></div>';
     			output += '<div class="db-entry db-song" data-toggle="context" data-target="#context-menu-folder-item"><div>';
                 output += data[i].Title + ' <span class="songtime">' + data[i].TimeMMSS + '</span></div>';
     		}
@@ -3914,9 +3951,11 @@ $('#context-backdrop').click(function(e){
     else if (currentView == 'tag') {
         $('#lib-song-' + (UI.dbEntry[0] + 1).toString()).removeClass('active');
         $('img.lib-coverart').removeClass('active');
+        $('#songsList .lib-disc a, #songsList .lib-album-heading a').removeClass('active');
     }
     else if (currentView == 'album') {
         $('#albumcovers .lib-entry').eq(UI.libPos[1]).removeClass('active');
+        $('#songsList .lib-disc a, #songsList .lib-album-heading a').removeClass('active');
     }
 });
 

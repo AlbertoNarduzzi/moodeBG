@@ -104,7 +104,6 @@
 		<!--removeIf(NOCONFIGSECTION)-->
 		<!-- build:js js/config.min.js defer -->
 		<!-- CONFIGBLOCKSECTION_BEGIN -->
-        <script src="js/custom_checkbox_and_radio.js" defer></script>
         <script src="js/custom_radio.js" defer></script>
         <script src="js/jquery.tagsinput.js" defer></script>
         <script src="js/jquery.placeholder.js" defer></script>
@@ -160,7 +159,7 @@
 		<div aria-label="Switch to Playbar" id="playback-switch"><div></div></div>
 
 		<div id="config-back">
-			<a aria-label="Back" href="<?php echo $_SESSION['config_back_link'] ?>"><i class="far fa-arrow-left"></i></a>
+			<a aria-label="Back" href="<?php echo $_SESSION['config_back_link'] ?>"><i class="far fa-angle-left"></i></a>
 		</div>
 
 		<div id="config-tabs" class="viewswitch-cfgs hide">

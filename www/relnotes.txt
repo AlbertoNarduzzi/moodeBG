@@ -17,15 +17,20 @@
 
 Updates
 
+- UPD: Bump to CamillaDSP 1.0.2
 - UPD: Add UI layout for Ultra-wide screens
 - UPD: Add Analog clock option for CoverView
 - UPD: Use thin style for CoverView clocks
+- UPD: Improve CUE handling and presentation
+- UPD: Improve restart/shutdown notifications
 - UPD: Improve Quick help
 - UPD: Use the correct name for AirPlay
+- UPD: Default to Playback view after startup
 - UPD: Refactor CSS and config templates
 
 Bug fixes
 
+- Fix: SMB server ON/OFF setting not working
 - FIX: Top border of Playbar is visible
 - FIX: Startup hangs if Bluetooth on but no adapter is present
 
