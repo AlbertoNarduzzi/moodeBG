@@ -935,7 +935,9 @@ function renderUI() {
 
 
         //TODO: probably add priority Hybrid to force-change the song cover...
-    	if (MPD.json['file'] !== UI.currentFile && MPD.json['cover_art_hash'] !== UI.currentHash) {
+        let MPDPureCurrentFile = MPD.json['file'] && MPD.json['file'].indexOf('.cue/track') >= 0 ? MPD.json['file'].substring(0, MPD.json['file'].lastIndexOf('/track')) : MPD.json['file'];
+        let UIPureCurrentFile = UI.currentFile && UI.currentFile.indexOf('.cue/track') >= 0 ? UI.currentFile.substring(0, UI.currentFile.lastIndexOf('/track')) : UI.currentFile;
+    	if (MPDPureCurrentFile !== UIPureCurrentFile && ((SESSION.json['library_covsearchpri'] == 'Hybrid') || (MPD.json['cover_art_hash'] !== UI.currentHash))) {
     		//console.log(MPD.json['coverurl']);
             // Standard cover for Playback
      		$('#coverart-url').html('<img class="coverart" ' + 'src="' + MPD.json['coverurl'] + '" ' + 'data-adaptive-background="1" alt="Cover art not found"' + '>');
