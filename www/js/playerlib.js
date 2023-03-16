@@ -932,6 +932,9 @@ function renderUI() {
     	//console.log('CUR: ' + UI.currentHash);
     	//console.log('NEW: ' + MPD.json['cover_art_hash']);
     	// Compare new to current to prevent unnecessary image reloads
+
+
+        //TODO: probably add priority Hybrid to force-change the song cover...
     	if (MPD.json['file'] !== UI.currentFile && MPD.json['cover_art_hash'] !== UI.currentHash) {
     		//console.log(MPD.json['coverurl']);
             // Standard cover for Playback

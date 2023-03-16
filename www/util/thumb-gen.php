@@ -153,8 +153,6 @@ function createThumb($file, $dir, $search_pri, $thm_w, $thm_q) {
 	$img_str = false;
 	//workerLog('thumb-gen: Path: ' . $path);
 
-	// here we should INVERT the search... 1st we try to use the FILE for both "folder file" AND "embedded+", and if not found we handle embedded for embedded+ ONLY	
-
 	if ($search_pri == 'Embedded cover') {
 		// Check for embedded cover in file
 		$img_str = getImage($path, $file);
@@ -174,8 +172,8 @@ function createThumb($file, $dir, $search_pri, $thm_w, $thm_q) {
 
 		if ($img_str === false) {
 			if ($search_pri == 'Hybrid') {
-			// Check for embedded cover in file
-			$img_str = getImage($path, $file);
+				// Check for embedded cover in file
+				$img_str = getImage($path, $file);
 		}
 	
 		if ($img_str === false) {
