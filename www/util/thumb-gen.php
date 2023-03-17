@@ -174,8 +174,9 @@ function createThumb($file, $dir, $search_pri, $thm_w, $thm_q) {
 			if ($search_pri == 'Hybrid') {
 				// Check for embedded cover in file
 				$img_str = getImage($path, $file);
+	    	}
 		}
-	
+
 		if ($img_str === false) {
 			// Nothing found
 			$img_str = NOT_FOUND_JPG;
