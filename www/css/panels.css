@@ -655,7 +655,7 @@ input[type='range']::-webkit-slider-thumb {background:transparent;height:20px;wi
 body.cv .timeline-thm input[type='range']::-webkit-slider-thumb {background-image:var(--fatthumb);width:20px;}
 input[type='range']::-moz-range-thumb {border:none;width:0.75em;height:0.75em;border-radius:50%;box-shadow:0 0 0.125em #333;background:#fff;}
 input[type="range"].vslide2 {height:10em;width:2.5em;margin:.5em 0;-webkit-appearance: slider-vertical;}
-input[type='range'].vslide2::-webkit-slider-thumb {background:#fff;radius:50%;background-image:'';height:1em;width:1em;}
+input[type='range'].vslide2::-webkit-slider-thumb {background:#fff;border-radius:50%;background-image:'';height:1em;width:1em;}
 input[type='range'].vslide2::-moz-range-track {height:10em;width:2px;border-radius:unset;background-color:var(--timecolor);}
 /* animate favorites button */
 @keyframes pulse {0% {transform:scale(1);} 50% {transform:scale(1.15);}	100% {transform:scale(1);}}
