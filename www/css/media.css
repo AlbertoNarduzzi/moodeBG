@@ -493,6 +493,8 @@ body {
 	#index-browse,
 	#index-radio,
 	#index-playlist {display:block!important;}
+
+	#songsList {padding-bottom:13rem;}
 }
 
 /*
