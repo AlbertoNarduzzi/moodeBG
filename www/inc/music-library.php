@@ -673,7 +673,6 @@ function getMpdEncodedAt($file) {
 }
 
 function getChannels($songData) {
-	// $mpdEncodedAt = getMpdEncodedAt($songData['file']);
 	$mpdEncodedAt = explode(':', $songData['Format']);
 	return $mpdEncodedAt[2];
 }
