@@ -122,7 +122,7 @@ function genFlatList($sock) {
 				$cmd = "search \"((base '" . $dir . "') AND (file !~ 'flac$|aif$|aiff$|wav$|dsf$|dff$'))\"";
 				break;
 		}
-
+		//workerLog($cmd);
 		sendMpdCmd($sock, $cmd);
 		$resp .= readMpdResp($sock);
 	}
