@@ -140,7 +140,7 @@ function parseTrackInfo($resp) {
 					$array[12] = array('Duration' => formatSongTime($value));
 					break;
 				case 'Comment':
-					$array[15] = array($element => $value);
+					$array[14] = array($element => $value);
 					break;
 			}
 
@@ -154,11 +154,7 @@ function parseTrackInfo($resp) {
 		$array[6] = !empty(rtrim($genres, ', ')) ? array('Genres' => rtrim($genres, ', ')) : '';
 		// Audio format
 		$encodedAt = getEncodedAt(array('file' => $file), 'verbose');
-		if ($encodedAt != 'Not playing') {
-			$formatData = explode('/', $encodedAt);
-			$array[13] = array('Audio Format' => $formatData[0] . '/' . $formatData[1] . ' ' . $formatData[3]);
-			$array[14] = array('Channels' => formatChannels($formatData[2]));
-		}
+		$array[13] = $encodedAt == 'Not playing' ? '' : array('Audio format' => $encodedAt);
 	}
 
 	return $array;
