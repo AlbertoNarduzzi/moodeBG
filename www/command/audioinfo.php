@@ -83,7 +83,7 @@ function parseTrackInfo($resp) {
 	} else {
 		$array = array();
 		$line = strtok($resp, "\n");
-		$numLines = 15;
+		$numLines = 14;
 
 		for ($i = 0; $i < $numLines; $i++) {
 			$array[$i] = '';
