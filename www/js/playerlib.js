@@ -1050,8 +1050,8 @@ function renderUI() {
         if (MPD.json['artist'] == 'Radio station') {
             $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(RADIO_HD_BADGE_TEXT);
         } else if (MPD.json['audio_sample_rate'] !== null) {
-            if (MPD.json['audio_sample_rate'].slice(0, 3) == 'dsd') {
-               $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(MPD.json['audio_sample_rate'].toUpperCase());
+            if (MPD.json['audio_format'].slice(0, 3) == 'dsd') {
+               $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(MPD.json['audio_format'].toUpperCase());
            } else {
                $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(ALBUM_HD_BADGE_TEXT);
            }
@@ -1764,6 +1764,9 @@ function renderRadioView() {
             else if (sortTag == 'genre') {
                 return collator.compare(removeArticles(a[sortTag].split(', ')[0]), removeArticles(b[sortTag].split(', ')[0]));
             }
+            else if (sortTag == 'bitrate') {
+                return collator.compare(b[sortTag], a[sortTag]);
+            }
             else {
                 return collator.compare(a[sortTag], b[sortTag]);
             }
@@ -1777,6 +1780,9 @@ function renderRadioView() {
             }
             else if (sortTag == 'genre') {
                 return collator.compare(removeArticles(a[sortTag].split(', ')[0]), removeArticles(b[sortTag].split(', ')[0]));
+            }
+            else if (sortTag == 'bitrate') {
+                return collator.compare(b[sortTag], a[sortTag]);
             }
             else {
                 return collator.compare(a[sortTag], b[sortTag]);
