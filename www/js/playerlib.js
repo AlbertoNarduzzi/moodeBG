@@ -990,21 +990,34 @@ function renderUI() {
     	}
 
     	// Extra metadata displayed under the cover
-        // NOTE: #countdown-sample-rate is displayed in the countdown knob on Ultrawide 1920 x 540/480 displays
-    	if (MPD.json['state'] === 'stop') {
-    		$('#extra-tags-display, #ss-extra-metadata').html('Not playing');
-            $('#countdown-sample-rate, #songsand-sample-rate').text('')
+        // (1) #countdown-sample-rate is displayed in the time knob on Ultrawide displays
+        // (2) #songsand-sample-rate is displayed under the metadata in mobile portrait
+        // Stop or pause
+    	if (MPD.json['state'] == 'stop') { // Radio station
+    		$('#extra-tags-display, #ss-extra-metadata, #countdown-sample-rate').text('Not playing');
+            $('#countdown-sample-rate, #songsand-sample-rate').text('');
+            $('#ss-extra-metadata-output-format').text('');
+        } else if (MPD.json['state'] == 'pause') { // Track
+            $('#ss-extra-metadata-output-format, #countdown-sample-rate').text('Not playing');
+            $('#extra-tags-display').text(formatExtraTagsString());
+        // Play
     	} else if (SESSION.json['extra_tags'].toLowerCase() == 'none' || SESSION.json['extra_tags'] == '') {
-            $('#extra-tags-display, #ss-extra-metadata').html('');
+            $('#extra-tags-display, #ss-extra-metadata').text('');
             $('#countdown-sample-rate').text('')
-        } else if (MPD.json['artist'] == 'Radio station') {
-    		$('#extra-tags-display, #ss-extra-metadata').html((MPD.json['bitrate'] ? MPD.json['bitrate'] : 'Variable bitrate'));
-            $('#countdown-sample-rate, #songsand-sample-rate').html((MPD.json['bitrate'] ? MPD.json['bitrate'] : 'Variable bps'));
-    	} else {
-            $('#extra-tags-display').html(formatExtraTagsString());
-            $('#ss-extra-metadata').html(MPD.json['encoded']);
-            $('#countdown-sample-rate, #songsand-sample-rate').text(MPD.json['encoded']);
-    	}
+            $('#ss-extra-metadata-output-format').text('');
+        } else {
+            if (MPD.json['artist'] == 'Radio station') {
+                var bitRate = MPD.json['bitrate'] ? MPD.json['bitrate'] : 'Variable bps'
+        		$('#extra-tags-display').text(bitRate + ' • ' + MPD.json['output']);
+                $('#countdown-sample-rate, #songsand-sample-rate, #ss-extra-metadata').text(bitRate);
+        	} else {
+                $('#extra-tags-display').text(formatExtraTagsString());
+                $('#ss-extra-metadata, #songsand-sample-rate').text(MPD.json['encoded']);
+                $('#countdown-sample-rate').text(MPD.json['encoded'].split(',')[0]);
+        	}
+
+            $('#ss-extra-metadata-output-format').html('<i class="fal fa-play-circle"></i>' + ' ' + MPD.json['output']);
+        }
 
         // Default metadata
         if (MPD.json['artist'] == 'Radio station') {
@@ -1020,8 +1033,9 @@ function renderUI() {
             $('#playbar-currentalbum').html('<span id="playbar-hd-badge"></span>' + (MPD.json['file'].indexOf('somafm') != -1 ?
                 RADIO.json[MPD.json['file']]['name'] : MPD.json['album']));
             $('#playbar-currentsong').html(MPD.json['title']);
-            // Screen saver
-            $('#ss-currentsong').html(MPD.json['title']);
+            // CoverView
+            $('#ss-currentsong').text(MPD.json['title']);
+            $('#ss-currentartist').text('');
             $('#ss-currentalbum').html('<span id="ss-hd-badge"></span>' + (MPD.json['file'].indexOf('somafm') != -1 ?
                 RADIO.json[MPD.json['file']]['name'] : MPD.json['album']));
         } else {
@@ -1038,10 +1052,17 @@ function renderUI() {
             var artist = (MPD.json['artist'] == 'Unknown artist' ? MPD.json['albumartist'] : MPD.json['artist']);
             var dash = (typeof(artist) == 'undefined' || artist == '') ? '' : ' - ';
             // Playbar
- 			$('#playbar-currentsong').html(artist + dash + MPD.json['title']);
+ 			$('#playbar-currentsong').text(artist + dash + MPD.json['title']);
             $('#playbar-currentalbum').html('<span id="playbar-hd-badge"></span>' + MPD.json['album']);
-            // Screen saver
-            $('#ss-currentsong').html(artist + dash + MPD.json['title']);
+            // CoverView
+            if (SESSION.json['scnsaver_layout'] == 'Default') {
+                $('#ss-currentsong').text(artist + dash + MPD.json['title']);
+                $('#ss-currentartist').text('');
+            } else {
+                // Wide mode
+                $('#ss-currentsong').text(MPD.json['title']);
+                $('#ss-currentartist').text(artist);
+            }
             $('#ss-currentalbum').html('<span id="ss-hd-badge"></span>' + MPD.json['album']);
         }
 
@@ -1830,7 +1851,7 @@ function renderRadioView() {
         var encodedAtOption = parseInt(SESSION.json['library_encoded_at']);
         var radioViewNvDiv = '';
         var radioViewHdDiv = '';
-        //var radioViewTxDiv = '';
+        var radioViewTxDiv = '';
         var radioViewBgDiv = '';
 
         // Favorites header (if any) and end flag
@@ -1854,10 +1875,10 @@ function renderRadioView() {
             // Encoded-at div's
             if (encodedAtOption != 9) {
                 var bitrate = parseInt(data[i].bitrate);
-                var bitrateAndFormat = data[i].bitrate + 'K ' + data[i].format;
+                var bitrateAndFormat = data[i].format + ' ' + data[i].bitrate + 'K ';
                 var radioViewNvDiv = encodedAtOption <= 1 ? '<div class="lib-encoded-at-notvisible">' + bitrateAndFormat + '</div>' : '';
                 var radioViewHdDiv = (encodedAtOption == 1 && bitrate > RADIO_BITRATE_THRESHOLD) ? '<div class="lib-encoded-at-hdonly">' + RADIO_HD_BADGE_TEXT + '</div>' : '';
-                //var radioViewTxDiv = encodedAtOption == 2 ? '<div class="lib-encoded-at-text">' + bitrateAndFormat + '</div>' : '';
+                var radioViewTxDiv = encodedAtOption == 2 ? '<div class="lib-encoded-at-text">' + bitrateAndFormat + '</div>' : '';
                 var radioViewBgDiv = encodedAtOption == 3 ? '<div class="lib-encoded-at-badge">' + bitrateAndFormat + '</div>' : '';
             }
 
@@ -1919,7 +1940,7 @@ function renderRadioView() {
             output += languageDiv;
             output += genreDiv;
 
-            //output += radioViewTxDiv;
+            output += radioViewTxDiv;
             output += radioViewNvDiv;
             output += '</li>';
 
