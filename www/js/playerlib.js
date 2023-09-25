@@ -1016,7 +1016,7 @@ function renderUI() {
                 $('#countdown-sample-rate').text(MPD.json['encoded'].split(',')[0]);
         	}
 
-            $('#ss-extra-metadata-output-format').html('<i class="fa-regular fa-sharp fa-play-circle"></i>' + ' ' + MPD.json['output']);
+            $('#ss-extra-metadata-output-format').html('<i class="fa-regular fa-sharp fa-waveform"></i>' + ' ' + MPD.json['output']);
         }
 
         // Default metadata
@@ -1588,11 +1588,15 @@ function renderFolderView(data, path, searchstr) {
 			continue;
 		}
     	if (data[i].directory) {
+            var rootFolderIcon = 'fa-circle-question';
+            if (data[i].directory == 'NAS' || data[i].directory == 'SDCARD' || data[i].directory == 'USB') {
+                rootFolderIcon = getParamOrValue('value', data[i].directory);
+            }
             var cueVirtualDir = false;
     		output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].directory + '">';
             output += '<div class="db-icon db-action">';
             output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-folder">';
-            output += path == '' ?  '<i class="fa-solid fa-sharp fa-hdd icon-root"></i></a></div>' :
+            output += path == '' ?  '<i class="fa-solid fa-sharp ' + rootFolderIcon + ' icon-root"></i></a></div>' :
                 (data[i].cover_hash == '' ? '<i class="fa-solid fa-sharp fa-folder"></i></a></div>' :
                 '<img src="' + 'imagesw/thmcache/' + encodeURIComponent(data[i].cover_hash) + '_sm.jpg' + '"></img></a></div>');
             var dirName = data[i].directory.replace(path + '/', '');
@@ -1609,7 +1613,7 @@ function renderFolderView(data, path, searchstr) {
     			output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].playlist + '">';
     			output += '<div class="db-icon db-action">';
     			output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-savedpl-root">';
-    			output += '<i class="fa-solid fa-sharp fa-list-alt icon-root"></i></a></div>';
+    			output += '<i class="fa-solid fa-sharp fa-list-music icon-root"></i></a></div>';
     			output += '<div class="db-entry db-savedplaylist db-browse"><div>' + data[i].playlist; + '</div></div>';
     			output += '</li>';
     		}
@@ -1627,7 +1631,7 @@ function renderFolderView(data, path, searchstr) {
 
                 output += '</img></a></div>';
                 output += '<div class="db-entry db-album" data-toggle="context" data-target="#context-menu-folder">';
-                var artist = data[i].Artist ? data[i].Artist : (data[i].AlbumArtist ? data[i].AlbumArtist : 'Artist tag undefined')
+                var artist = data[i].AlbumArtist ? data[i].AlbumArtist : (data[i].Artist ? data[i].Artist : 'Artist tag undefined')
                 output += '<div>' + data[i].Album + '<span>' + artist + '</span></div></div>';
                 output += '</li>';
             }
@@ -1636,9 +1640,12 @@ function renderFolderView(data, path, searchstr) {
     			output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].file + '">';
     			output += '<div class="db-icon db-song db-action">'; // Hack to enable entire line click for context menu
     			output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-folder-item">';
-                output += (data[i].Track ? data[i].Track : "•") + '</a></div>';
+                output += (data[i].Track ? data[i].Track : "•") + '</a>';
+                output += '</div>';
     			output += '<div class="db-entry db-song" data-toggle="context" data-target="#context-menu-folder-item"><div>';
-                output += data[i].Title + ' <span class="songtime">' + data[i].TimeMMSS + '</span></div>';
+                output += data[i].Title + ' <span class="songtime">' + data[i].TimeMMSS + '</span>';
+                output += '<span>' + (data[i].Artist != data[i].AlbumArtist ? data[i].Artist : '') + '</span>';
+                output += '</div>';
     		}
     		else {
                 // Playlist item
@@ -1647,7 +1654,7 @@ function renderFolderView(data, path, searchstr) {
                     var itemType = 'CUE sheet';
     				output += '<div class="db-icon db-song db-browse db-action">';
                     output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-savedpl-item">';
-                    output += '<i class="fa-solid fa-sharp fa-list-alt icon-root db-browse-icon"></i></a></div>';
+                    output += '<i class="fa-solid fa-sharp fa-list-music icon-root db-browse-icon"></i></a></div>';
                     output += '<div class="db-entry db-song db-browse" data-toggle="context" data-target="#context-menu-savedpl-item">';
     			}
     			else {
@@ -1657,8 +1664,8 @@ function renderFolderView(data, path, searchstr) {
                         var iconClass = 'fa-microphone';
     				}
                     else {
-                        var itemType = 'Song file';
-                        var iconClass = 'fa-music';
+                        var itemType = 'Music file';
+                        var iconClass = 'fa-file-music';
     				}
                     output += '<div class="db-icon db-song db-browse db-action">';
                     output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-savedpl-item">';
@@ -2710,7 +2717,7 @@ $(document).on('click', '.context-menu a', function(e) {
                                 var rxChecked = rxStatusParts[1] == 'On' ? 'checked' : ''; // Status
                                 var rxCheckedDisable = rxStatusParts[2] == '?' ? ' disabled' : ''; // Volume
                                 var rxMuteIcon = rxStatusParts[3] == '1' ? 'fa-volume-mute' : 'fa-volume-up'; // Mute
-                                var rxMasterVolOptIn = rxStatusParts[4] == '0' ? '' : '<i class="fa-regular fa-sharp fa-dot-circle"></i>'; // Master vol opt-in
+                                var rxMasterVolOptIn = rxStatusParts[4] == '0' ? '' : '<i class="fa-regular fa-sharp fa-dial"></i>'; // Master vol opt-in
 
                                 output += '<div class="control-group">';
                                 // Receiver hostname
