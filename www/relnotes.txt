@@ -17,6 +17,9 @@
 
 Updates
 
+- UPD: Bump to shairport-sync 4.3.1
+- UPD: Bump to NQPTP 1.2.4
+- UPD: Bump to Fontawesome 6.4.2 Pro and update specific icons
 - UPD: Add comparison operators =~ and !~ (PERL regex) to Library Adv search
 - UPD: Add DSDNN badge for DSF/DFF/WavPack DSD formats
 - UPD: Add WavPack format to Default/Default+ options for Prefs, Thumbgen scan
@@ -25,6 +28,7 @@ Updates
 - UPD: Add channel count to extra metadata
 - UPD: Add ALSA output format (output) to extra metadata
 - UPD: Add Artist under Title in Folder view (if Artist not = AlbumArtist)
+- UPD: Add Prefs option for static waveform now-playing icon
 - UPD: Improve metadata layout in CoverView wide mode
 - UPD: Improve sort headings in Radio and Playlist views
 - UPD: Improve bitrate sort in Radio view (sort high to low)
@@ -32,7 +36,7 @@ Updates
 - UPD: Replace bogus title tag " - " in NTS Live stations with default title
 - UPD: Show "Radio station" for stations that don't transmit a title tag
 - UPD: Standardize display style for encodedAt and ALSA output formats
-- UPD: Bump to Fontawesome 6.4.2 Pro and update specific icons
+- UPD: Move Local Display and Peripherals from System to Peripherals Config
 
 Bug fixes
 
@@ -41,6 +45,8 @@ Bug fixes
 - FIX: MPD mixer reverts to "software' after disconnecting bluetooth device
 - FIX: Backup/Restore missing Prefs, Library, Track play setting
 - FIX: Restore not updating buffer size in /etc/bluealsaaplay.conf
+- FIX: Invert polarity auto-click not working
+- FIX: SomaFM station name displays null when tag not present
 
 ################################################################################
 #

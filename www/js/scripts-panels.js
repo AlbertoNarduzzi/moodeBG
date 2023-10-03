@@ -137,8 +137,8 @@ jQuery(document).ready(function($) { 'use strict';
     	themeBack = 'rgba(' + THEME.json[SESSION.json['themename']]['bg_color'] + ',' + SESSION.json['alphablend'] +')';
     	themeMcolor = str2hex(THEME.json[SESSION.json['themename']]['tx_color']);
     	if (SESSION.json['adaptive'] == "No") {document.body.style.setProperty('--adaptmbg', themeBack);}
-    	blurrr == true ? themeOp = .85 : themeOp = .95;
-
+        //themeOp = blurrr == true ? .85 : .95;
+        themeOp = 0.75; // A bit less opacity for menu background
 
         function mutate(mutations) {
             mutations.forEach(function(mutation) {
@@ -176,6 +176,7 @@ jQuery(document).ready(function($) { 'use strict';
     	abFound = false;
     	showMenuTopW = false
     	showMenuTopR = false
+        GLOBAL.npIcon = getParamOrValue('value', SESSION.json['show_npicon']);
     	setColors();
 
         $('.ralbum').html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M475.31 364.144L288 256l187.31-108.144c5.74-3.314 7.706-10.653 4.392-16.392l-4-6.928c-3.314-5.74-10.653-7.706-16.392-4.392L272 228.287V12c0-6.627-5.373-12-12-12h-8c-6.627 0-12 5.373-12 12v216.287L52.69 120.144c-5.74-3.314-13.079-1.347-16.392 4.392l-4 6.928c-3.314 5.74-1.347 13.079 4.392 16.392L224 256 36.69 364.144c-5.74 3.314-7.706 10.653-4.392 16.392l4 6.928c3.314 5.74 10.653 7.706 16.392 4.392L240 283.713V500c0 6.627 5.373 12 12 12h8c6.627 0 12-5.373 12-12V283.713l187.31 108.143c5.74 3.314 13.079 1.347 16.392-4.392l4-6.928c3.314-5.74 1.347-13.079-4.392-16.392z"/></svg>');
@@ -1297,7 +1298,7 @@ jQuery(document).ready(function($) { 'use strict';
             if (data.length > 0) {
                 var output = '';
                 for (i = 0; i < data.length; i++) {
-                    var active = SESSION.json['lib_active_search'] == data[i]['name'] ? '<span id="saved-search-item-check" style="float:right;"><i class="fa-regular fa-sharp fa-check"></i></span>' : '';
+                    var active = SESSION.json['lib_active_search'] == data[i]['name'] ? '<span id="saved-search-item-check" style="float:right;"><i class="fa-solid fa-sharp fa-check"></i></span>' : '';
                     output += '<li id="saved-search-item-' + (i + 1)
                         + '" class="saved-search-item" data-toggle="context" data-target="#context-menu-saved-search-contents" '
                         + 'data-name="' + data[i]['name'] + '">';
