@@ -29,6 +29,7 @@ Updates
 - UPD: Add ALSA output format (output) to extra metadata
 - UPD: Add Artist under Title in Folder view (if Artist not = AlbumArtist)
 - UPD: Add Prefs option for static waveform now-playing icon
+- UPD: Add BSSID to info on Network Config
 - UPD: Improve metadata layout in CoverView wide mode
 - UPD: Improve icon for volume popup by always showing level
 - UPD: Improve sort headings in Radio and Playlist views
@@ -57,6 +58,7 @@ Bug fixes
 - FIX: Restore not updating buffer size in /etc/bluealsaaplay.conf
 - FIX: Invert polarity auto-click not working
 - FIX: SomaFM station name displays null when tag not present
+- FIX: Base folder RADIO not excluded correctly in Folder view
 - FIX: WebUI visual glitch when MPD is restarted
 
 ################################################################################

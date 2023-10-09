@@ -1562,7 +1562,7 @@ function renderFolderView(data, path, searchstr) {
 	UI.path = path;
     $('#db-path').text(path);
 
-	// Separate out dirs, playlists, files, exclude RADIO folder
+	// Separate out dirs, playlists, files, exclude the RADIO folder
 	var dirs = [];
 	var playlists =[];
 	var files = [];
@@ -1571,19 +1571,17 @@ function renderFolderView(data, path, searchstr) {
 		if (typeof(data[i].directory) != 'undefined' && data[i].directory != 'RADIO') {
 			dirs[j] = data[i];
 			j = j + 1;
-		}
-		else if (typeof(data[i].playlist) != 'undefined') {
+		} else if (typeof(data[i].playlist) != 'undefined') {
 			playlists[k] = data[i];
 			k = k + 1;
-		}
-		else {
-            if (typeof(data[i].file) != 'undefined' && data[i].file.indexOf('RADIO') == -1) {
+		} else {
+            if (typeof(data[i].file) != 'undefined' && data[i].file.indexOf('RADIO/') == -1) {
                 files[l] = data[i];
     			l = l + 1;
             }
 		}
 	}
-
+s
 	// Sort directories and playlists
 	var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 	if (typeof(dirs[0]) != 'undefined') {
@@ -2499,7 +2497,7 @@ $(document).on('click', '.context-menu a', function(e) {
             }
 
             // If its a playlist, preload the playlist name
-    		if (path.indexOf('/') == -1 && path != 'NAS' && path != 'RADIO' && path != 'SDCARD' && path != 'USB') {
+    		if (path.indexOf('/') == -1 && !containsBaseFolderName(path)) {
     			$('#playlist-save-name').val(path);
     		} else {
     			$('#playlist-save-name').val('');
@@ -4641,4 +4639,9 @@ function autoClick(selector) {
 // Return HD badge text for Library and Playback views
 function albumHDBadge(format) {
     return format.slice(0, 3) == 'DSD' ? format : ALBUM_HD_BADGE_TEXT;
+}
+
+// Base folder names
+function containsBaseFolderName(name) {
+    return (~name.indexOf('NAS') || ~name.indexOf('RADIO') || ~name.indexOf('SDCARD') || ~name.indexOf('USB'));
 }
