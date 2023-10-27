@@ -144,8 +144,11 @@ switch ($option) {
 		$file = file_get_contents('/var/www/footer.min.php');
 		echo substr($file, strpos($file, 'Release: ') + 9, 16) . "\n";
 		break;
-	case '--revision':
+	case '--pirev':
 		echo shell_exec('/var/www/util/pirev.py');
+		break;
+	case '--osinfo':
+		echo shell_exec('/var/www/util/sysutil.sh "get-osinfo"');
 		break;
 	case '--version':
 		echo VERSION . "\n";
@@ -188,7 +191,8 @@ With no OPTION print the help text and exit.
  --autocfglog\tPrint auto config update log
  --sleepint\tPrint daemon sleep intervals
  --mooderel\tPrint moOde release
- --revision\tPrint hardware revision
+ --pirev\tPrint Pi revision
+ --osinfo\tPrint OS info
  --version\tPrint program version
  --help\t\tPrint this help text\n";
 		break;
@@ -234,16 +238,13 @@ function updateFeatures($features, $featBitmask, $argv) {
 	if ($match == false) {
 		echo '3rd argument N does equal any feature value' . "\n";
 		return;
-	}
-	elseif ($argv[2] == 'add' && ($arg3 & $bitmask)) {
+	} else if ($argv[2] == 'add' && ($arg3 & $bitmask)) {
 		echo 'Feature is already enabled, cannot add' . "\n";
 		return;
-	}
-	elseif ($argv[2] == 'rm' && !($arg3 & $bitmask)) {
+	} else if ($argv[2] == 'rm' && !($arg3 & $bitmask)) {
 		echo 'Feature is not already enabled, cannot remove' . "\n";
 		return;
-	}
-	else {
+	} else {
 		$newBitmask = $argv[2] == 'add' ? $bitmask + $arg3 : $bitmask - $arg3;
 		shell_exec("sqlite3 " .  SQLDB_PATH . " \"UPDATE cfg_system set value='" . $newBitmask . "' WHERE param='feat_bitmask'\"");
 		echo 'Old bitmask ' . $featBitmask . "\n";
@@ -263,9 +264,8 @@ function dumpSession() {
 		// Radio stations
 		if (substr($key, 0, 4) == 'http') {
 			echo $key . '|' . $value['name'] . '|' . $value['type'] . '|' . $value['bitrate'] . '|' . $value['format'] . "\n";
-		}
-		// Cfg_system, etc
-		else {
+		} else {
+			// Cfg_system, etc
 			echo $key . '|' . (is_array($value) ? 'Array' : $value) . "\n";
 		}
 	}
@@ -294,28 +294,26 @@ function audioFormats($option) {
 
 	if (empty(trim(file_get_contents('/proc/asound/card' . $cardNum . '/id')))) {
 		echo 'No device found at MPD configured card ' . $cardNum . "\n";
-	}
-	else {
-		$audioOutput = trim(shell_exec('cat /proc/asound/card' . $cardNum . '/pcm0p/sub0/hw_params | grep closed'));
+	} else {
+		$hwParams = trim(shell_exec('cat /proc/asound/card' . $cardNum . '/pcm0p/sub0/hw_params | grep closed'));
 
-		if ($audioOutput == 'closed') {
+		if ($hwParams == 'closed') {
 			// Just formats for the configured device
 			if ($option == '-f') {
 				$result = shell_exec('alsacap -C ' . $cardNum . ' -D 0 2>&1 | grep "Sample formats:"');
 				if (!empty($result)) {
 					echo explode(': ', $result)[1];
-				}
-				else {
+				} else {
 					echo "Unable to detect formats\n";
 				}
-			}
-			// $option == '-F': full info for all devices
-			else {
+			} else {
+				// $option == '-F': full info for all devices
 				$result = shell_exec('alsacap 2>&1');
 				echo $result;
 			}
-		}
-		else {
+		} else if (empty($hwParams)) {
+			echo 'WARNING: Card ' . $cardNum . ' hwparams is empty' . "\n";
+		} else {
 			if (posix_getuid() != 0) {
 				echo "This option requires sudo if the device is in use\n";
 				return;
@@ -342,8 +340,7 @@ function systemMonitor() {
 		if ($cpuFreq < 1000000) {
 	        $cpuFreq = number_format((int)$cpuFreq / 1000, 0, '.', '');
 	        $cpuFreq .= ' MHz';
-		}
-		else {
+		} else {
 	        $cpuFreq = number_format((int)$cpuFreq / 1000000, 1, '.', '');
 	        $cpuFreq .= ' GHz';
 		}
@@ -461,8 +458,7 @@ function checkStationUrls($argv) {
 			$playable = false === $tmpFile ? '?' : 'OK';
 			if ($tmpFile == false) {
 				echo $id . "\t" . '?' . "\t" . $name . ' | ' . $url . "\n";
-			}
-			elseif ($argv[1] == '-u') {
+			} else if ($argv[1] == '-u') {
 				echo $id . "\t" . 'OK' . "\t" . $name . "\n";
 			}
 		}
@@ -523,8 +519,8 @@ function printHWParams() {
 function printMPDLog() {
 	clearstatcache();
 	if (filesize(MPD_LOG)) {
-		echo shell_exec('cat ' . MPD_LOG);}
-	else {
+		echo shell_exec('cat ' . MPD_LOG);
+	} else {
 		echo 'The MPD log is empty or was previously cleared' . "\n";
 	}
 }
@@ -541,8 +537,8 @@ function printMountMonLog() {
 	if (file_exists(MOUNTMON_LOG)) {
 		clearstatcache();
 		if (filesize(MOUNTMON_LOG)) {
-			echo shell_exec('cat ' . MOUNTMON_LOG);}
-		else {
+			echo shell_exec('cat ' . MOUNTMON_LOG);
+		} else {
 			echo 'The mount monitor log is empty or was previously cleared' . "\n";
 		}
 	} else {
@@ -620,8 +616,7 @@ function detectCIFSVersion($host) {
 
 		if (strpos($version, 'SMBv1')) {
 			$version = '1.0';
-		}
-		elseif (array_key_exists($version, $cifsVersions)) {
+		} else if (array_key_exists($version, $cifsVersions)) {
 			$version = $cifsVersions[$version];
 		}
 
