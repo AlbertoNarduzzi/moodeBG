@@ -192,7 +192,7 @@ if (null === $path) {
 $path = ensureAudioFile($path);
 
 // file: embedded cover
-if (($searchPriority == 'Embedded cover') || ($searchPriority == 'Hybrid')) { // Embedded first
+if ($searchPriority == 'Embedded cover') { // Embedded first
 	getImage($path);
 }
 

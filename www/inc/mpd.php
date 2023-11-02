@@ -834,12 +834,6 @@ function getCoverHash($file) {
 			}
 
 			if ($hash === false) {
-				if ($searchPriority == 'Hybrid') { // Embedded last if no overriding image found
-					$hash = getHash($path);
-				}
-			}
-
-			if ($hash === false) {
 				// Nothing found
 				$hash = 'getCoverHash(): no cover found';
 			}

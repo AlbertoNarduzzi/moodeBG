@@ -60,7 +60,7 @@ function getParamOrValue (type, key) {
         // Library recently added
         ['1 Week','604800000'],['1 Month','2592000000'],['3 Months','7776000000'],['6 Months','15552000000'],['1 Year','31536000000'],['No limit','3153600000000'],
         // Library cover search priority
-        ['Embedded','Embedded cover'],['Cover file','Cover image file'],['Hybrid', 'Hybrid'],
+        ['Embedded','Embedded cover'],['Cover file','Cover image file'],
         // Font size factors
         ['Smaller',.35],['Small',.40],['Normal',.45],['Large',.55],['Larger',.65],['X-Large',.75],
         // Sample rate display options

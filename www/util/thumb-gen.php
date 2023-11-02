@@ -173,13 +173,6 @@ function createThumb($file, $dir, $searchPri, $thmW, $thmQ) {
 		}
 
 		if ($imgStr === false) {
-			if ($searchPri == 'Hybrid') {
-				// Check for embedded cover in file
-				$imgStr = getImage($path, $file);
-	    	}
-		}
-
-		if ($imgStr === false) {
 			// Nothing found
 			$imgStr = NOT_FOUND_JPG;
 		}
@@ -302,7 +295,7 @@ function outImage($mime, $data) {
 function getImage($path, $file = '') {
 	//workerLog('thumb-gen: getImage(): ' . $file);
 	if (!file_exists($path)) {
- 		//workerLog('thumb-gen: getImage(): File does not exist: ' . $file);
+		//workerLog('thumb-gen: getImage(): File does not exist: ' . $file);
 		return false;
 	}
 
