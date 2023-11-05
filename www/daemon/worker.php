@@ -513,8 +513,20 @@ if ($_SESSION['fs_smb'] == 'On') {
 if ($_SESSION['fs_nfs'] == 'On') {
 	sysCmd('systemctl start nfs-server');
 }
-workerLog('worker: SMB file sharing: ' . lcfirst($_SESSION['fs_smb']));
-workerLog('worker: NFS file sharing: ' . lcfirst($_SESSION['fs_nfs']));
+// DLNA
+if ($_SESSION['feat_bitmask'] & FEAT_MINIDLNA) {
+	if (isset($_SESSION['dlnasvc']) && $_SESSION['dlnasvc'] == 1) {
+		$status = 'on';
+		startMiniDlna();
+	} else {
+		$status = 'off';
+	}
+} else {
+	$status = 'n/a';
+}
+workerLog('worker: SMB file sharing:  ' . lcfirst($_SESSION['fs_smb']));
+workerLog('worker: NFS file sharing:  ' . lcfirst($_SESSION['fs_nfs']));
+workerLog('worker: DLNA file sharing: ' . $status);
 
 //----------------------------------------------------------------------------//
 workerLog('worker: --');
@@ -707,16 +719,19 @@ $resp = readMpdResp($sock);
 // Ignore CUE files
 setCuefilesIgnore($_SESSION['cuefiles_ignore']);
 workerLog('worker: MPD ignore CUE:     ' . ($_SESSION['cuefiles_ignore'] == '1' ? 'yes' : 'no'));
-// Load Default PLaylist if first boot
+// On first boot load Default PLaylist and run MPD database update
 if ($_SESSION['first_use_help'] == 'y,y') {
 	sendMpdCmd($sock, 'clear');
 	$resp = readMpdResp($sock);
 	sendMpdCmd($sock, 'load "Default Playlist"');
 	$resp = readMpdResp($sock);
 	workerLog('worker: MPD first boot:     default playlist loaded');
+	sendMpdCmd($sock, 'update');
+	$resp = readMpdResp($sock);
+	workerLog('worker: MPD first boot:     database update submitted');
 }
 // MPD/CamillaDSP volume sync
-workerLog('worker: MPD CDSP volsync:   ' . ucfirst($_SESSION['camilladsp_volume_sync']));
+workerLog('worker: MPD CDSP volsync:   ' . lcfirst($_SESSION['camilladsp_volume_sync']));
 workerLog('worker: MPD CDSP volrange:  ' . $_SESSION['camilladsp_volume_range'] . ' dB');
 $serviceCmd = isMPD2CamillaDSPVolSyncEnabled() ? 'start' : 'stop';
 sysCmd('systemctl ' . $serviceCmd .' mpd2cdspvolume');
@@ -747,7 +762,7 @@ if ($mounts === true) { // Empty result
 		workerLog('worker: NAS source:     ' . $mp['name']);
 	}
 	$result = sourceMount('mountall');
-	workerLog('worker: NAS mount:      ' . ucfirst($result));
+	workerLog('worker: NAS mount:      ' . lcfirst($result));
 }
 
 //----------------------------------------------------------------------------//
@@ -901,19 +916,6 @@ if ($_SESSION['feat_bitmask'] & FEAT_UPMPDCLI) {
 	$status = 'n/a';
 }
 workerLog('worker: UPnP client:     ' . $status);
-
-// Start miniDLNA
-if ($_SESSION['feat_bitmask'] & FEAT_MINIDLNA) {
-	if (isset($_SESSION['dlnasvc']) && $_SESSION['dlnasvc'] == 1) {
-		$status = 'started';
-		startMiniDlna();
-	} else {
-		$status = 'available';
-	}
-} else {
-	$status = 'n/a';
-}
-workerLog('worker: DLNA server:     ' . $status);
 
 // Start GPIO button handler
 if ($_SESSION['feat_bitmask'] & FEAT_GPIO) {
