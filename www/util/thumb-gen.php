@@ -295,7 +295,7 @@ function outImage($mime, $data) {
 function getImage($path, $file = '') {
 	//workerLog('thumb-gen: getImage(): ' . $file);
 	if (!file_exists($path)) {
-		//workerLog('thumb-gen: getImage(): File does not exist: ' . $file);
+ 		//workerLog('thumb-gen: getImage(): File does not exist: ' . $file);
 		return false;
 	}
 
