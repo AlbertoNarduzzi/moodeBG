@@ -486,7 +486,7 @@ function engineCmd() {
                         '<span id="inpsrc-msg-text">' + inputSourceName +
                         ' Input Active: <button class="btn volume-popup-btn" data-toggle="modal"><i class="fa-regular fa-sharp fa-volume-up"></i></button><span id="inpsrc-preamp-volume"></span>' +
                         '</span>' +
-                        '<a class="btn configure-renderer" href="inp-config.php">Input Source</a>' +
+                        '<a class="btn configure-renderer" href="inp-config.php">Input Select</a>' +
                         audioInfoBtn());
                     break;
                 case 'btactive1':
@@ -567,6 +567,7 @@ function engineCmd() {
                 case 'recorder_nofiles':
                     notify('recorder_nofiles', '', '5_seconds');
                     break;
+                case 'reset_view':
                 case 'refresh_screen':
                     setTimeout(function() {
                         location.reload(true);
@@ -626,7 +627,11 @@ function engineCmdLite() {
                 case 'cdsp_config_update_failed':
                     notify('cdsp_config_update_failed', '', '10_seconds');
                     break;
+                case 'reset_view':
                 case 'refresh_screen':
+                    if (cmd[0] == 'reset_view') {
+                        window.location.replace('/index.php');
+                    }
                     setTimeout(function() {
                         location.reload(true);
                     }, DEFAULT_TIMEOUT);
@@ -1205,7 +1210,7 @@ function renderUI() {
                 '<span id="inpsrc-msg-text">' + SESSION.json['audioin'] +
                 ' Input Active: <button class="btn volume-popup-btn" data-toggle="modal"><i class="fa-regular fa-sharp fa-volume-up"></i></button><span id="inpsrc-preamp-volume"></span>' +
                 '</span>' +
-                '<a class="btn configure-renderer" href="inp-config.php">Input Source</a>' +
+                '<a class="btn configure-renderer" href="inp-config.php">Input Select</a>' +
                 audioInfoBtn());
     	}
     	// Bluetooth renderer
@@ -2760,7 +2765,7 @@ $(document).on('click', '.context-menu a', function(e) {
                                 var rxChecked = rxStatusParts[1] == 'On' ? 'checked' : ''; // Status
                                 var rxCheckedDisable = rxStatusParts[2] == '?' ? ' disabled' : ''; // Volume
                                 var rxMuteIcon = rxStatusParts[3] == '1' ? 'fa-volume-mute' : 'fa-volume-up'; // Mute
-                                var rxMasterVolOptIn = rxStatusParts[4] == '0' ? '' : '<i class="fa-regular fa-sharp fa-dial"></i>'; // Master vol opt-in
+                                var rxMasterVolOptIn = rxStatusParts[4] == '0' ? '' : '<i class="fa-regular fa-sharp fa-circle-check"></i>'; // Master vol opt-in
 
                                 output += '<div class="control-group">';
                                 // Receiver hostname
