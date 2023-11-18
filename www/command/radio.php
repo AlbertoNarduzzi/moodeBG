@@ -64,6 +64,14 @@ switch ($_GET['cmd']) {
 	case 'put_radioview_show_hide':
 		putRadioViewShowHide($_POST['block'], $_POST['type']);
 		break;
+
+	case 'mpd_monitor_svc':
+		sysCmd('killall -s 9 mpdmon.php');
+		//workerLog($_POST['svc'] . '|' . $_POST['opt']);
+		if ($_POST['svc'] == 'On') {
+			sysCmd('/var/www/daemon/mpdmon.php "' . $_POST['opt'] . '" > /dev/null 2>&1 &');
+		}
+		break;
 	default:
 		echo 'Unknown command';
 		break;
@@ -97,7 +105,7 @@ function getStationContents($stName) {
 		'format' => $result[0]['format'],
 		'geo_fenced' => $result[0]['geo_fenced'],
 		'home_page' => $result[0]['home_page'],
-		'reserved2' => $result[0]['reserved2']
+		'monitor' => $result[0]['monitor']
 	);
 	return $contents;
 }
@@ -154,11 +162,12 @@ function putStationContents($cmd, $path, $stFile) {
 			"'" . $path['format'] . "'," .
 			"'" . $path['geo_fenced'] . "'," .
 			"'" . SQLite3::escapeString($path['home_page']) . "'," .
-			"'" . $path['reserved2'] . "'";
+			"'" . $path['monitor'] . "'";
 		$result = sqlQuery('INSERT INTO cfg_radio VALUES ' . '(' . $values . ')', $dbh);
 	}
 
 	if ($cmd == 'upd_station') {
+		// NOTE: Values have to be in column order
 		$values =
 			"station='" . SQLite3::escapeString($path['url']) . "'," .
 			"name='" . SQLite3::escapeString($path['name']) . "'," .
@@ -173,7 +182,7 @@ function putStationContents($cmd, $path, $stFile) {
 			"format='" . $path['format'] . "'," .
 			"geo_fenced='" . $path['geo_fenced'] . "'," .
 			"home_page='" . SQLite3::escapeString($path['home_page']) . "'," .
-			"reserved2='" . $path['reserved2'] . "'";
+			"monitor='" . $path['monitor'] . "'";
 		$result = sqlQuery('UPDATE cfg_radio SET ' . $values . " WHERE id='" . $path['id'] . "'", $dbh);
 	}
 
@@ -184,7 +193,9 @@ function putStationContents($cmd, $path, $stFile) {
 		'type' => $path['type'],
 		'logo' => 'local',
 		'bitrate' => $path['bitrate'],
-		'format' => $path['format']
+		'format' => $path['format'],
+		'home_page' => $path['home_page'],
+		'monitor' => $path['monitor']
 	);
 	phpSession('close');
 
