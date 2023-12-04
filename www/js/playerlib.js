@@ -90,9 +90,9 @@ var UI = {
 	dbCmd: '',
 	// Either 'lsinfo' or 'get_pl_items_fv'
 	libPos: [-1,-1,-1],
-	// [0]: albums list pos
-	// [1]: album cover pos
-	// [2]: artist list pos
+	// [0]: Album list pos
+	// [1]: Album cover pos
+	// [2]: Artist list pos
 	// Special values for [0] and [1]: -1 = full lib displayed, -2 = lib headers clicked, -3 = search performed
 	radioPos: -1,
     playlistPos: -1,
@@ -1096,10 +1096,8 @@ function renderUI() {
         // Set HD badge text
         if (MPD.json['artist'] == 'Radio station') {
             $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(RADIO_HD_BADGE_TEXT);
-        } else if (MPD.json['audio_sample_rate'] !== null) {
-            $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(albumHDBadge(MPD.json['audio_format']));
         } else {
-            $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text('');
+            $('.playback-hd-badge, #playbar-hd-badge, #ss-hd-badge').text(albumHDBadge(MPD.json['audio_format']));
         }
 
         // Show/hide HD badge
