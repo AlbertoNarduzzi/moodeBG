@@ -11,13 +11,14 @@
 
 ################################################################################
 #
-# 2023-12-02 moOde 8.3.7 (Bullseye)
+# 2023-12-05 moOde 8.3.7 (Bullseye)
 #
 ################################################################################
 
 New features
 
 - NEW: Radio manager stream monitor for restarting stalled streams
+- NEW: Qobuz credentials section in UPnP Config
 
 Updates
 
