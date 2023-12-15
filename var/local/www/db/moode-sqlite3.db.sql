@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.1.0 on Tue Dec 5 16:00:48 2023
+-- File generated with SQLiteStudio v3.1.0 on Fri Dec 15 09:36:35 2023
 --
 -- Text encoding used: UTF-8
 --
@@ -105,7 +105,7 @@ INSERT INTO cfg_system (id, param, value) VALUES (40, 'lcdup', '0');
 INSERT INTO cfg_system (id, param, value) VALUES (41, 'library_show_genres', 'Yes');
 INSERT INTO cfg_system (id, param, value) VALUES (42, 'extmeta', '0');
 INSERT INTO cfg_system (id, param, value) VALUES (43, 'i2soverlay', 'None');
-INSERT INTO cfg_system (id, param, value) VALUES (44, 'hdwrrev', '');
+INSERT INTO cfg_system (id, param, value) VALUES (44, 'folder_pos', '-1');
 INSERT INTO cfg_system (id, param, value) VALUES (45, 'crossfeed', 'Off');
 INSERT INTO cfg_system (id, param, value) VALUES (46, 'bluez_pcm_buffer', '500000');
 INSERT INTO cfg_system (id, param, value) VALUES (47, 'fs_nfs_options', 'rw,sync,no_subtree_check,no_root_squash');
@@ -234,7 +234,7 @@ INSERT INTO cfg_system (id, param, value) VALUES (169, 'fs_nfs', 'Off');
 INSERT INTO cfg_system (id, param, value) VALUES (170, 'fs_nfs_access', '');
 INSERT INTO cfg_system (id, param, value) VALUES (171, 'native_lazyload', 'Yes');
 INSERT INTO cfg_system (id, param, value) VALUES (172, 'library_onetouch_pl', 'No action');
-INSERT INTO cfg_system (id, param, value) VALUES (173, 'scnsaver_mode', 'Cover');
+INSERT INTO cfg_system (id, param, value) VALUES (173, 'scnsaver_mode', 'Cover art');
 INSERT INTO cfg_system (id, param, value) VALUES (174, 'scnsaver_layout', 'Default');
 INSERT INTO cfg_system (id, param, value) VALUES (175, 'scnsaver_xmeta', 'Yes');
 
@@ -734,6 +734,9 @@ INSERT INTO cfg_mpd (id, param, value) VALUES (45, 'sox_flags', '0');
 INSERT INTO cfg_mpd (id, param, value) VALUES (46, 'max_playlist_length', '16384');
 INSERT INTO cfg_mpd (id, param, value) VALUES (47, 'stop_dsd_silence', 'no');
 INSERT INTO cfg_mpd (id, param, value) VALUES (48, 'thesycon_dsd_workaround', 'no');
+INSERT INTO cfg_mpd (id, param, value) VALUES (49, 'proxy', '');
+INSERT INTO cfg_mpd (id, param, value) VALUES (50, 'proxy_user', '');
+INSERT INTO cfg_mpd (id, param, value) VALUES (51, 'proxy_password', '');
 
 COMMIT TRANSACTION;
 PRAGMA foreign_keys = on;

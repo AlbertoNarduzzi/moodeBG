@@ -89,12 +89,13 @@ var UI = {
     // [5]: Playname for clock radio
 	dbCmd: '',
 	// Either 'lsinfo' or 'get_pl_items_fv'
+    radioPos: -1,
+    folderPos: -1,
 	libPos: [-1,-1,-1],
     // [0]: Album list pos (tag view)
     // [1]: Album cover pos (album view)
     // [2]: Artist list pos (tag view)
     // Special values for [0] and [1]: -1 = full lib displayed, -2 = lib headers clicked, -3 = search performed
-	radioPos: -1,
     playlistPos: -1,
 	libAlbum: '',
 	mobile: false,
@@ -1627,7 +1628,7 @@ s
     	if (data[i].directory) {
             var rootFolderIcon = 'fa-circle-question';
             if (data[i].directory == 'NAS' || data[i].directory == 'SDCARD' || data[i].directory == 'USB') {
-                rootFolderIcon = getParamOrValue('value', data[i].directory);
+                rootFolderIcon = getKeyOrValue('value', data[i].directory);
             }
             var cueVirtualDir = false;
     		output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].directory + '">';
@@ -2566,7 +2567,7 @@ $(document).on('click', '.context-menu a', function(e) {
                 $('#info-toggle-edit-logoimage').css('margin-left','60px');
                 $('#preview-edit-logoimage').html('<img src="../imagesw/radio-logos/thumbs/' + data['name'] + '.jpg">');
                 $('#edit-station-tags').css('margin-top', '20px');
-                $('#edit-station-type span').text(getParamOrValue('param', data['type']));
+                $('#edit-station-type span').text(getKeyOrValue('key', data['type']));
                 $('#edit-station-genre').val(data['genre']);
                 $('#edit-station-broadcaster').val(data['broadcaster']);
                 $('#edit-station-home-page').val(data['home_page']);
@@ -2910,11 +2911,11 @@ $(document).on('click', '.context-menu a', function(e) {
                 $('#albumview-sort-order span').text('by ' + SESSION.json['library_albumview_sort']);
                 $('#tagview-sort-order span').text('by ' + SESSION.json['library_tagview_sort']);
                 $('#track-play span').text(SESSION.json['library_track_play']);
-                $('#recently-added span').text(getParamOrValue('param', SESSION.json['library_recently_added']));
-                $('#show-encoded-at span').text(getParamOrValue('param', SESSION.json['library_encoded_at']));
-                $('#cover-search-priority span').text(getParamOrValue('param', SESSION.json['library_covsearchpri']));
+                $('#recently-added span').text(getKeyOrValue('key', SESSION.json['library_recently_added']));
+                $('#show-encoded-at span').text(getKeyOrValue('key', SESSION.json['library_encoded_at']));
+                $('#cover-search-priority span').text(getKeyOrValue('key', SESSION.json['library_covsearchpri']));
                 $('#thumbgen-scan span').text(SESSION.json['library_thmgen_scan']);
-                $('#hires-thumbnails span').text(getParamOrValue('param', SESSION.json['library_hiresthm']));
+                $('#hires-thumbnails span').text(getKeyOrValue('key', SESSION.json['library_hiresthm']));
                 $('#thumbnail-columns span').text(SESSION.json['library_thumbnail_columns']);
 
                 // Library (Advanced)
@@ -2929,7 +2930,7 @@ $(document).on('click', '.context-menu a', function(e) {
                 $('#utf8-char-filter span').text(SESSION.json['library_utf8rep']);
 
         		// CoverView
-                $('#scnsaver-timeout span').text(getParamOrValue('param', SESSION.json['scnsaver_timeout']));
+                $('#scnsaver-timeout span').text(getKeyOrValue('key', SESSION.json['scnsaver_timeout']));
                 $('#auto-coverview span').text(SESSION.json['auto_coverview'] == '-on' ? 'Yes' : 'No');
         		$('#scnsaver-style span').text(SESSION.json['scnsaver_style']);
                 $('#scnsaver-mode span').text(SESSION.json['scnsaver_mode']);
@@ -3114,11 +3115,11 @@ $('#btn-preferences-update').click(function(e){
     if (SESSION.json['library_albumview_sort'] != $('#albumview-sort-order span').text().replace('by ', '')) {libraryOptionsChange = true;}
     if (SESSION.json['library_tagview_sort'] != $('#tagview-sort-order span').text().replace('by ', '')) {libraryOptionsChange = true;}
     if (SESSION.json['library_track_play'] != $('#track-play span').text()) {libraryOptionsChange = true;}
-    if (SESSION.json['library_recently_added'] != getParamOrValue('value', $('#recently-added span').text())) {libraryOptionsChange = true;}
-    if (SESSION.json['library_encoded_at'] != getParamOrValue('value', $('#show-encoded-at span').text())) {reloadLibrary = true;}
-    if (SESSION.json['library_covsearchpri'] != getParamOrValue('value', $('#cover-search-priority span').text())) {libraryOptionsChange = true;}
+    if (SESSION.json['library_recently_added'] != getKeyOrValue('value', $('#recently-added span').text())) {libraryOptionsChange = true;}
+    if (SESSION.json['library_encoded_at'] != getKeyOrValue('value', $('#show-encoded-at span').text())) {reloadLibrary = true;}
+    if (SESSION.json['library_covsearchpri'] != getKeyOrValue('value', $('#cover-search-priority span').text())) {libraryOptionsChange = true;}
     if (SESSION.json['library_thmgen_scan'] != $('#thumbgen-scan span').text()) {/*NOP*/}
-    if (SESSION.json['library_hiresthm'] != getParamOrValue('value', $('#hires-thumbnails span').text())) {regenThumbsReqd = true;}
+    if (SESSION.json['library_hiresthm'] != getKeyOrValue('value', $('#hires-thumbnails span').text())) {regenThumbsReqd = true;}
     if (SESSION.json['library_thumbnail_columns'] != $('#thumbnail-columns span').text()) {thumbSizeChange = true;}
 
     // Library (Advanced)
@@ -3140,7 +3141,7 @@ $('#btn-preferences-update').click(function(e){
     if (SESSION.json['search_site'] != $('#search_site span').text()) {libraryOptionsChange = true;} // @Atair
 
     // CoverView
-    if (SESSION.json['scnsaver_timeout'] != getParamOrValue('value', $('#scnsaver-timeout span').text())) {scnSaverTimeoutChange = true;}
+    if (SESSION.json['scnsaver_timeout'] != getKeyOrValue('value', $('#scnsaver-timeout span').text())) {scnSaverTimeoutChange = true;}
     if (SESSION.json['auto_coverview'] != ($('#auto-coverview span').text() == 'Yes' ? '-on' : '-off')) {autoCoverViewChange = true;}
 	if (SESSION.json['scnsaver_style'] != $('#scnsaver-style span').text()) {scnSaverStyleChange = true;}
     if (SESSION.json['scnsaver_mode'] != $('#scnsaver-mode span').text()) {scnSaverModeChange = true;}
@@ -3174,11 +3175,11 @@ $('#btn-preferences-update').click(function(e){
     SESSION.json['library_albumview_sort'] = $('#albumview-sort-order span').text().replace('by ', '');
     SESSION.json['library_tagview_sort'] = $('#tagview-sort-order span').text().replace('by ', '');
     SESSION.json['library_track_play'] = $('#track-play span').text();
-    SESSION.json['library_recently_added'] = getParamOrValue('value', $('#recently-added span').text());
-    SESSION.json['library_encoded_at'] = getParamOrValue('value', $('#show-encoded-at span').text());
-    SESSION.json['library_covsearchpri'] = getParamOrValue('value', $('#cover-search-priority span').text());
+    SESSION.json['library_recently_added'] = getKeyOrValue('value', $('#recently-added span').text());
+    SESSION.json['library_encoded_at'] = getKeyOrValue('value', $('#show-encoded-at span').text());
+    SESSION.json['library_covsearchpri'] = getKeyOrValue('value', $('#cover-search-priority span').text());
     SESSION.json['library_thmgen_scan'] = $('#thumbgen-scan span').text();
-    SESSION.json['library_hiresthm'] = getParamOrValue('value', $('#hires-thumbnails span').text());
+    SESSION.json['library_hiresthm'] = getKeyOrValue('value', $('#hires-thumbnails span').text());
     SESSION.json['library_thumbnail_columns'] = $('#thumbnail-columns span').text();
 
     // Library (Advanced)
@@ -3192,7 +3193,7 @@ $('#btn-preferences-update').click(function(e){
     SESSION.json['library_utf8rep'] = $('#utf8-char-filter span').text();
 
     // CoverView
-    SESSION.json['scnsaver_timeout'] = getParamOrValue('value', $('#scnsaver-timeout span').text());
+    SESSION.json['scnsaver_timeout'] = getKeyOrValue('value', $('#scnsaver-timeout span').text());
     SESSION.json['auto_coverview'] = ($('#auto-coverview span').text() == 'Yes' ? '-on' : '-off');
 	SESSION.json['scnsaver_style'] = $('#scnsaver-style span').text();
     SESSION.json['scnsaver_mode'] = $('#scnsaver-mode span').text();
@@ -4005,19 +4006,14 @@ function listLook(selector, list, searchText) {
 	}
 }
 
-// Radio pos
+// Library item position functions
 function storeRadioPos(pos) {
-	//console.log('radio_pos', pos);
     $.post('command/cfg-table.php?cmd=upd_cfg_system', {'radio_pos': pos});
 }
-// Playlist pos
 function storePlaylistPos(pos) {
-	//console.log('playlist_pos', pos);
     $.post('command/cfg-table.php?cmd=upd_cfg_system', {'playlist_pos': pos});
 }
-// Library pos
 function storeLibPos(pos) {
-	//console.log('lib_pos', pos[0], pos[1], pos[2]);
     $.post('command/cfg-table.php?cmd=upd_cfg_system', {'lib_pos': pos[0] + ',' + pos[1] + ',' + pos[2], 'lib_scope': GLOBAL.musicScope});
 }
 
@@ -4199,6 +4195,14 @@ function syncTimers() {
 // Active/inactive for buttons and panels
 function makeActive (vswitch, panel, view) {
     //const startTime = performance.now();
+
+    // DEBUG: Fetch _pos cfg_system values
+    /*var param = getKeyOrValue('value', view);
+    $.getJSON('command/cfg-table.php?cmd=get_cfg_system_value', {'param': param}, function(data) {
+        console.log('makeActive(): cfg_system:', view, data);
+        console.log('makeActive(): UI.rflpPos:', UI.radioPos, UI.folderPos, UI.libPos, UI.playlistPos);
+    });*/
+
 	if (UI.mobile) {
 		$('#playback-controls').css('display', '');
 		$('#content').css('height', '100vh');
@@ -4293,7 +4297,7 @@ function setLibMenuAndHeader () {
 		if (GLOBAL.musicScope == 'recent') {
 			$('.view-recents span').show();
 	        LIB.recentlyAddedClicked = true;
-			headerText = 'Added in last ' + getParamOrValue('param', SESSION.json['library_recently_added']).toLowerCase();
+			headerText = 'Added in last ' + getKeyOrValue('key', SESSION.json['library_recently_added']).toLowerCase();
 		}
         else {
 			$('.view-all span').show();
@@ -4418,34 +4422,39 @@ function lazyLode(view) {
                 customScroll('albumcovers', 0, scrollSpeed);
             }
         } else if (view == 'radio' && UI.radioPos >= 0) {
-            var rvHeaderCount = getRVHeaderCount();  // NOTE: Also updates UI.radioPos
-            customScroll('radio', UI.radioPos, scrollSpeed);
+            var rvHeaderCount = getRVHeaderCount();  // NOTE: Also updates UI.radioPos and cfg_system
+            customScroll('radio', (UI.radioPos), scrollSpeed);
             $('.database-radio li').removeClass('active');
-            $('#ra-' + (UI.radioPos - rvHeaderCount).toString()).addClass('active');
+            $('#ra-' + (UI.radioPos - rvHeaderCount + 1).toString()).addClass('active');
         } else if (view == 'playlist' && UI.playlistPos >= 0) {
             customScroll('playlist', UI.playlistPos, scrollSpeed);
         }
+        // DEBUG:
+        //console.log('lazyLode():   UI.rflpPos:', UI.radioPos, UI.folderPos, UI.libPos, UI.playlistPos);
     }, LAZYLOAD_TIMEOUT);
 }
 
 // Return number of headers before the station and update UI.radioPos
 function getRVHeaderCount() {
     var count = 0;
-    $('.database-radio li').each(function(index) {
-        if ($(this).hasClass('horiz-rule-radioview')) {
-            count = count + 1;
-        }
-        if ($(this).children('span').text() == RADIO.json[MPD.json['file']]['name']) {
-            UI.radioPos = index + 1;
-            return false;
-        }
-    });
+    if (typeof(RADIO.json[MPD.json['file']]) !== 'undefined') {
+        $('.database-radio li').each(function(index) {
+            if ($(this).hasClass('horiz-rule-radioview')) {
+                count = count + 1;
+            }
+            if ($(this).children('span').text() == RADIO.json[MPD.json['file']]['name']) {
+                UI.radioPos = index;
+                return false;
+            }
+        });
+        storeRadioPos(UI.radioPos);
+    }
     //console.log('getRVHeaderCount():', count, UI.radioPos);
     return count;
 }
 
 function setFontSize() {
-    var sizeFactor = getParamOrValue('value',SESSION.json['font_size']);
+    var sizeFactor = getKeyOrValue('value',SESSION.json['font_size']);
     if (UI.mobile) {
         sizeFactor += .3;
     }
@@ -4640,7 +4649,7 @@ function itemInfoModal(id, data) {
 
 // Now-playing icon
 function setNpIcon() {
-    GLOBAL.npIcon = getParamOrValue('value', SESSION.json['show_npicon']);
+    GLOBAL.npIcon = getKeyOrValue('value', SESSION.json['show_npicon']);
 
     if (SESSION.json['show_npicon'] != 'None') {
         if (typeof(MPD.json['song']) != 'undefined') {

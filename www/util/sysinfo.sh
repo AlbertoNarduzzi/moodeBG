@@ -29,7 +29,7 @@ SYSTEM_PARAMETERS() {
 	echo -e "\nmoOde release\t\t= $moode_rel\c"
 	echo -e "\nRaspiOS\t\t\t= $RASPIOS_VER\c"
 	echo -e "\nLinux kernel\t\t= $KERNEL_VER\c"
-	echo -e "\nPlatform\t\t= $hdwrrev\c"
+	echo -e "\nModel\t\t= $HDWRREV\c"
 	echo -e "\nArchitecture\t\t= $ARCH\c"
 	echo -e "\nHome directory\t\t= /home/$HOME_DIR\c"
 	echo -e "\nSystem uptime\t\t= $UPTIME\c"
@@ -425,6 +425,7 @@ DEV_ROOTFS_SIZE=3670016000
 #
 
 HOSTNAME=`uname -n`
+HDWRREV=$(moodeutl -d | grep hdwrrev | cut -d"|" -f2)
 RASPIOS_VER=`cat /etc/debian_version`
 KERNEL_VER=`uname -r`" "`uname -v | cut -d" " -f 1`
 SOC=`cat /proc/device-tree/compatible | tr '\0' ' ' | awk -F, '{print $NF}'`
@@ -681,12 +682,12 @@ lcdup=${arr[39]}
 library_show_genres=${arr[40]}
 extmeta=${arr[41]}
 i2soverlay=${arr[42]}
-hdwrrev=${arr[43]}
+folder_pos=${arr[43]}
 [[ "${arr[44]}" = "Off" ]] && crossfeed="Off" || crossfeed=${arr[44]}
 bluez_pcm_buffer=${arr[45]}
 fs_nfs_options=${arr[46]}
 library_onetouch_album=${arr[47]}
-radiopos=${arr[48]}
+radio_pos=${arr[48]}
 aplactive=${arr[49]}
 ipaddr_timeout=${arr[50]}
 [[ "${arr[51]}" = "1" ]] && ashufflesvc="On" || ashufflesvc="Off"
@@ -712,7 +713,8 @@ rotenc_params=${arr[70]}
 [[ "${arr[71]}" = "1" ]] && shellinabox="On" || shellinabox="Off"
 alsaequal=${arr[72]}
 eqfa12p=${arr[73]}
-rev=$(echo $hdwrrev | cut -c 4)
+rev=$(echo $HDWRREV | cut -c 4)
+# TODO: Add code for Pi-5
 if [[ $rev = "3" || $rev = "4" || $rev = "Z" ]]; then
 	[[ "${arr[74]}" = "1" ]] && piwifi="On" || piwifi="Off"
 	[[ "${arr[75]}" = "1" ]] && pibt="On" || pibt="Off"
@@ -859,7 +861,8 @@ apdchan=$(echo ${arr[2]} | cut -f 14 -d "|")
 apdrouter=$(echo ${arr[2]} | cut -f 15 -d "|")
 
 # Misc settings
-MODEL=${hdwrrev:3:1}
+# TODO: Add section for Pi-5
+MODEL=${HDWRREV:3:1}
 if [ $MODEL = 3 ]; then
 	TMP="$(vcgencmd otp_dump | grep 17:)"
 	if [ "$TMP" = "17:3020000a" ]; then
