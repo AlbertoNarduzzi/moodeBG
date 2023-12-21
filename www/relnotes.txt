@@ -20,11 +20,13 @@ New features
 Updates
 
 - UPD: Add HTTP proxy option to MPD Config
-- UPD: Ad disc and track to condition for showing now-playing icon in track list
+- UPD: Add disc and track to condition for showing now-playing icon in track list
 
 Bug fixes
 
 - FIX: getEncodedAt() bits assignment for lossy
+- FIX: Incorrect index used when switching to Radio view via station click
+- FIX: Move Queue item range to end not working
 
 ################################################################################
 #
