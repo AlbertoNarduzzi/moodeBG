@@ -346,7 +346,7 @@ body {
 	#trackscontainer span {font-size:1.1rem;}
 	#lib-coverart-meta-area {width:14vw;position:relative;}
 	#songsList {padding-bottom:10rem;}
-	#tagview-text-cover {font-size:1.35rem;}
+	#tagview-text-cover {font-size:1.35rem;padding:0;margin:0 .25em;}
 	#tagview-text-cover,
 	img.lib-artistart {height:calc(14vw - 1em);width:calc(14vw - 1em);}
 	/* Album, Folder, Radio and Playlist views */
