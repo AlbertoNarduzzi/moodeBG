@@ -1679,7 +1679,7 @@ s
     			output += '<li id="db-' + (i + 1) + '" data-path="' + data[i].file + '">';
     			output += '<div class="db-icon db-song db-action">'; // Hack to enable entire line click for context menu
     			output += '<a class="btn" href="#notarget" data-toggle="context" data-target="#context-menu-folder-item">';
-                output += (data[i].Track ? data[i].Track : "•") + '</a>';
+                output += (data[i].Track ? 1 * data[i].Track : "•") + '</a>';
                 output += '</div>';
     			output += '<div class="db-entry db-song" data-toggle="context" data-target="#context-menu-folder-item"><div>';
                 output += data[i].Title + ' <span class="songtime">' + data[i].TimeMMSS + '</span>';
