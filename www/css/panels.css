@@ -270,7 +270,7 @@ img.coverart {border-style:none;border-radius:.1em;box-shadow:0 .1em .2em rgba(3
 .database .db-entry {margin-left:4rem;padding:.75em 0;max-width:calc(100vw - 10px);overflow:hidden;font-size:1.1rem;line-height:normal;border-bottom:1px solid var(--btnshade);}
 .database .db-song {padding:.5em 0;}
 .database .db-icon {display:block;height:2.4em !important;width:2.4em !important;position:absolute !important;top:50%;transform:translate(0, -50%);padding:0;color:inherit;}
-.database .db-icon .btn {font-size:1em;padding:0;width:100%;}
+.database .db-icon .btn {font-size:1em;padding:0;width:100%;text-align:right;}
 .database .db-icon .btn img {height:100%;width:100%;border-radius:.2em;}
 .database .db-action a {position:absolute;transform:translate(0, -50%);top:50%;}
 .db-song.db-action a {width:100vw;}
