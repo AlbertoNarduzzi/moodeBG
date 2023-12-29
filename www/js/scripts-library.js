@@ -824,7 +824,7 @@ var renderSongs = function(albumPos) {
             output += albumDiv
                 + discDiv
                 + '<li id="lib-song-' + (i + 1) + '" class="clearfix lib-track" data-toggle="context" data-target="#context-menu-lib-item">'
-    			+ '<div class="lib-entry-song"><span class="songtrack' + highlight + '">' + filteredSongs[i].tracknum + '</span>'
+    			+ '<div class="lib-entry-song"><span class="songtrack' + npIcon + '">' + 1 * filteredSongs[i].tracknum + '</span>'
     			+ '<span class="songname">' + filteredSongs[i].title + '</span>'
     			+ '<span class="songtime"> ' + filteredSongs[i].time_mmss + '</span>'
 
