@@ -13,7 +13,8 @@
  * GNU General Public License for more details.
  *
  * Refer to the link below for a copy of the GNU General Public License.
- * http://www.gnu.org/licenses/
+ * http://www.gnu.org/licenses/.config-msg-static {display:block;font-size:12px;color:var(--config-help-color);margin-top:var(--config-help-margin-top);margin-bottom:var(--config-ctl-margin-bottom);}
+
  *
  */
 
@@ -48,7 +49,7 @@ legend {font-size:1.5rem;font-weight:200;border-bottom:1px solid #888;margin-bot
 .sub-legend {margin:-1em 0 1.5em 0;color:var(--config-help-color);font-size:12px;}
 
 /* Form controls */
-.control-label {font-size:12px;padding-top:.2em!important;}
+.control-label {/*font-size:12px;*/padding-top:.2em!important;}
 .toggle {margin:0 var(--config-ctl-margin-right) var(--config-ctl-margin-bottom-toggle) 0;}
 
 .toggle,
@@ -83,7 +84,7 @@ a.config-info-toggle {vertical-align:top;}
 .config-info-toggle i {vertical-align:top;margin-top:5px;font-size:18px;}
 .config-help-info,
 .config-help-static,
-.config-msg-static {display:block;font-size:12px;color:var(--config-help-color);margin-top:var(--config-help-margin-top);margin-bottom:var(--config-ctl-margin-bottom);}
+.config-msg-static {display:block;/*font-size:12px;*/color:var(--config-help-color);margin-top:var(--config-help-margin-top);margin-bottom:var(--config-ctl-margin-bottom);}
 .config-help-info {display:none;}
 .config-help-no-margin {margin-bottom:0;}
 
