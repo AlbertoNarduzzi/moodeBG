@@ -312,7 +312,7 @@ img.coverart {
 .pll2-album {display:none!important;}
 #genresList li, #artistsList li, #albumsList li {line-height:calc(1.45em + 1vmin);max-width:calc(33vw - 2.3rem);}
 #genresList li, #artistsList li, #albumsList li {width:calc(100% - (var(--sbw) + 1.17rem));}
-#top-columns.nogenre #albumsList li, #top-columns.nogenre #artistsList li {max-width:calc(50vw - 2.3rem);}
+#top-columns.nogenre #albumsList li, #top-columns.nogenre #artistsList li {max-width:calc(50vw - 3.0rem);}
 #albumsList .lib-entry img {
 	width:3rem;
 	margin:0 .35em 0 .15em;
