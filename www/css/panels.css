@@ -170,7 +170,7 @@ html {background-color:inherit;}
 .volume-display-db {position:absolute;top:50%;left:60%;margin-left:.1em;z-index:0;font-size:.8em;transform:translate(0, -50%);}
 #volpad .volume-display-db {left:68%;font-size:1.1em;}
 #volume, #volume-2 {display:none;} /* Using .volume-display to overlay this element so it can be used as a mute toggle */
-#volzone, #timezone, #volbtns-2 {font-family:'Lato',sans-serif;}
+#volzone, #timezone, #volbtns-2 {font-family:'Lato',sans-serif,monospace;}
 #volbtns, #volbtns-2 {display:flex;position:absolute;transform:translate(-50%,-50%);top:50%;left:50%;height:70%;margin:0 auto;flex-direction:column;}
 #volumedn, #volumedn-2, #volumeup, #volumeup-2 {font-size:2.5vw;font-weight:400;margin:0 auto;padding:.25rem 1rem;height:33%;color:var(--adapttext);}
 #songsand {width:98%;margin:0 auto;}
