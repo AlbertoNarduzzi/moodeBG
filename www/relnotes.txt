@@ -11,13 +11,13 @@
 
 ################################################################################
 #
-# 2026-MM-DD moOde 10.1.2 (Trixie)
+# 2026-03-02 moOde 10.1.2 (Trixie)
 #
 ################################################################################
 
 Updates:
-- UPD: Improve Library stats
 - UPD: Improve Radio track covers
+- UPD: Improve Library stats
 
 Bug fixes
 - FIX: Samba auto-starts during boot via wsdd2 systemd dep
