@@ -16,12 +16,17 @@
 ################################################################################
 
 Updates
+- UPD: Improve AirPlay and Spotify Connect metadata readers
 - UPD: Improve layout of the Library section of Preferences
 - UPD: Improve Quick help explanation of the custom AlbumDate tag
+- UPD: Improve Peripheral Config help and field validation
+- UPD: Add CSS media query for 1920x720 resolution
+- UPD: Add CSS media query for 960x360 resolution
 - UPD: Replace predefined search filter "hdonly" with "hires" to match badge
 
 Bug fixes
 - FIX: Goto folder various issues
+- FIX: Dropdown menu hover corner radius for first and last item
 
 ################################################################################
 #

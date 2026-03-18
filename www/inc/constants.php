@@ -31,10 +31,10 @@ const MPD_MUSICROOT = '/var/lib/mpd/music/';
 const MPD_PLAYLIST_ROOT = '/var/lib/mpd/playlists/';
 const MPD_LOG = '/var/log/mpd/log';
 // AirPlay, Deezer Connect and Spotify Connect
-const APLMETA_FILE = '/var/local/www/aplmeta.txt';
-const DEEZMETA_FILE = '/var/local/www/deezmeta.txt';
+const APLMETA_CACHE_FILE = '/var/local/www/aplmeta.json';
+const DEEZMETA_CACHE_FILE = '/var/local/www/deezmeta.json';
 const DEEZ_CREDENTIALS_FILE = '/etc/deezer/deezer.toml';
-const SPOTMETA_FILE = '/var/local/www/spotmeta.txt';
+const SPOTMETA_CACHE_FILE = '/var/local/www/spotmeta.json';
 const ITUNES_API_BASE_URL = 'https://itunes.apple.com/search';
 // SQLite
 const SQLDB = 'sqlite:/var/local/www/db/moode-sqlite3.db';
@@ -44,13 +44,14 @@ const DASHBOARD_CACHE_FILE = '/var/local/www/dashboard.txt';
 // Library/Playback
 const LIBCACHE_BASE = '/var/local/www/libcache';
 const ROOT_DIRECTORIES = array('NAS', 'NVME', 'OSDISK', 'RADIO', 'SATA', 'USB');
-const DEFAULT_RADIO_TITLE = 'Radio station';
+const DEFAULT_STATION_NAME = 'Radio station';
 const DEFAULT_RADIO_COVER = 'images/default-album-cover.png';
 const DEFAULT_ALBUM_COVER = 'images/default-album-cover.png';
 const DEFAULT_UPNP_COVER = 'images/default-upnp-cover.jpg';
 const DEFAULT_RX_COVER = 'images/default-rx-cover.jpg';
 const DEFAULT_PLAYLIST_COVER = '/var/www/images/default-playlist-cover.jpg';
 const DEFAULT_NOTFOUND_COVER = '/var/www/images/default-notfound-cover.jpg';
+const DEFAULT_WEBUI_DISPLAY_URL = 'http://localhost/';
 const AIRPLAY_COVERS_ROOT = '/var/local/www/imagesw/airplay-covers/';
 const PLAYLIST_COVERS_ROOT = '/var/local/www/imagesw/playlist-covers/';
 const RADIO_LOGOS_ROOT = '/var/local/www/imagesw/radio-logos/';
