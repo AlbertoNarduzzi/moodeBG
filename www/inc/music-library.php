@@ -588,6 +588,14 @@ function getLibraryStats($sock) {
 	$artists = array();
 	$albumKeys = array();
 	foreach ($fileList as $file) {
+		// Path (the albums might be differentiated by that) - also by MUSICBRAINZ tags, so mybe there is room for improvement...
+		$apath = explode("/", $file);
+		$removeFromHere = -1; // remove the filename
+		if (str_ends_with($apath[count($apath) - 2], ".cue") == true) {
+			$removeFromHere = -2; // remove the cue filename
+		}
+		array_splice($apath, $removeFromHere);
+		$albumPath = join("/", $apath);
 		// Albums
 		sendMpdCmd($sock, 'lsinfo "' . $file . '"');
 		$tags = parseLsinfoAsArray(readMpdResp($sock));
@@ -605,7 +613,7 @@ function getLibraryStats($sock) {
 		}
 
 		// Create unique album keys
-		$albumKey = $album . '@' . $albumartist;
+		$albumKey = $album . '@' . $albumartist . '@' . $albumPath;
 		if  (!in_array($albumKey, $albumKeys)) {
 			array_push($albumKeys, $albumKey);
 		}
