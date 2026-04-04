@@ -22,13 +22,14 @@ New features
 Updates
 - UPD: Bump to Linux kernel 6.12.75
 - UPD: Improve Radio station track cover feature
-- UPD: Improve AirPlay and Spotify Connect metadata readers
+- UPD: Improve AirPlay and Spotify Connect covers feature
 - UPD: Improve layout of the Library section of Preferences
 - UPD: Improve Quick help explanation of the custom AlbumDate tag
 - UPD: Improve Peripheral Config help and field validation
 - UPD: Add 'play' context menu for Playlist items
 - UPD: Add CSS media query for 1920x720 resolution
 - UPD: Add CSS media query for 960x360 resolution
+- UPD: Add support for EXTINF title tags in playlist files
 - UPD: Replace predefined search filter "hdonly" with "hires" to match badge
 - UPD: Disable ModemManager service (broadband network support)
 
@@ -36,6 +37,8 @@ Bug fixes
 - FIX: Various issues with the "Goto folder" feature
 - FIX: Song files with "Name" tag detected as radio stations
 - FIX: Dropdown menu hover corner radius for first and last item
+- FIX: Renderer covers not sized correctly in certain portrait viewports
+- FIX: Thumbgen fails to scan artist images when Prefs > Audio formats = All+
 
 ################################################################################
 #
