@@ -16,8 +16,11 @@
 ################################################################################
 
 New features
-- NEW: Shairport-sync version 5 (new image only)
+- NEW: Shairport-sync version 5 (new image)
 - NEW: Graphic/Parametric EQ control API (REST and CLI)
+
+Security (new image)
+- SEC: First use of sudo at console prompts for password
 
 Updates
 - UPD: Bump to Linux kernel 6.12.75
@@ -39,6 +42,7 @@ Bug fixes
 - FIX: Dropdown menu hover corner radius for first and last item
 - FIX: Renderer covers not sized correctly in certain portrait viewports
 - FIX: Thumbgen fails to scan artist images when Prefs > Audio formats = All+
+- FIX: Display set options in moodeutl and REST API not validating "toggle"
 
 ################################################################################
 #
