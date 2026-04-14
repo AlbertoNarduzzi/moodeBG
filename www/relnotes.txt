@@ -11,7 +11,7 @@
 
 ################################################################################
 #
-# 2026-MM-DD moOde 10.1.3 (Trixie)
+# 2026-MM-DD moOde 10.2.0 (Trixie)
 #
 ################################################################################
 
@@ -24,11 +24,14 @@ Security (new image)
 
 Updates
 - UPD: Bump to Linux kernel 6.12.75
+- UPD: Bump to CamillaDSP 4.1.1
 - UPD: Improve Radio station track cover feature
 - UPD: Improve AirPlay and Spotify Connect covers feature
 - UPD: Improve layout of the Library section of Preferences
 - UPD: Improve Quick help explanation of the custom AlbumDate tag
 - UPD: Improve Peripheral Config help and field validation
+- UPD: Improve ALSA device name parsing during startup
+- UPD: Improve watchdog Wake display on play
 - UPD: Add 'play' context menu for Playlist items
 - UPD: Add CSS media query for 1920x720 resolution
 - UPD: Add CSS media query for 960x360 resolution
