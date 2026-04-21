@@ -489,17 +489,35 @@ function autoConfigSettings() {
 		}],
 		['requires' => ['bt_auto_disconnect'], 'handler' => 'setSessVarOnly'],
 		'AirPlay',
-		['requires' => ['airplay_interpolation', 'airplay_output_format', 'airplay_output_rate',
-			'airplay_allow_session_interruption', 'airplay_session_timeout', 'airplay_audio_backend_latency_offset_in_seconds',
-			'airplay_audio_backend_buffer_desired_length_in_seconds', 'airplay_disable_synchronization'],
+		['requires' => ['airplay_interpolation',
+			'airplay_eight_channel_mode',
+			'airplay_six_channel_mode',
+			'airplay_mixdown',
+			'airplay_output_channel_mapping',
+			'airplay_audio_backend_latency_offset_in_seconds',
+			'airplay_audio_backend_buffer_desired_length_in_seconds',
+			'airplay_run_this_before_entering_active_state',
+			'airplay_run_this_after_exiting_active_state',
+			'airplay_active_state_timeout',
+			'airplay_wait_for_completion',
+			'airplay_allow_session_interruption',
+			'airplay_session_timeout',
+			'airplay_output_rate',
+			'airplay_output_format',
+			'airplay_output_channels',
+			'airplay_disable_synchronization',
+			'airplay_disable_standby_mode',
+			'airplay_cover_art_cache_directory'],
 			'handler' => function($values) {
-				$dbh = sqlConnect();
-				$prefix = 'airplay_';
-				foreach ($values as $key => $value) {
-					$param = str_replace($prefix, '', $key);
-					$result = sqlUpdate('cfg_airplay', $dbh, $param, $value);
-					$value = is_numeric($value) ? $value : '"' . $value . '"';
-					sysCmd("sed -i '/" . $param . ' =' . '/c\\' . $param . ' = ' . $value . ";' /etc/shairport-sync.conf");
+				if (isAirPlayInstalled() === true) {
+					$dbh = sqlConnect();
+					$prefix = 'airplay_';
+					foreach ($values as $key => $value) {
+						$key = str_replace($prefix, '', $key);
+						sqlUpdate('cfg_airplay', $dbh, $key, $value);
+						$value = is_numeric($value) ? $value : '"' . $value . '"';
+						sysCmd("sed -i 's/^" . $key . " = .*;/" . $key . ' = ' . $value . ";/' /etc/shairport-sync.conf");
+					}
 				}
 			}, 'custom_write' => function($values) {
 				return getCfgTableParams('cfg_airplay', $values, 'airplay_');
