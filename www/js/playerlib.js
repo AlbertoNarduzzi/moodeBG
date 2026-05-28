@@ -847,9 +847,9 @@ function updateInpsrcMeta(cmd, data) {
     $('#inpsrc-backdrop').css('transform', 'scale(1.0)');
 
 	// Formats
-	// - AirPlay: title, artist,  album, duration (in ms),  cover_url,  sformat, oformat
-	// - Deezer:  title, artist,  album, duration (in sec), cover_url,  sformat,  decoder
-	// - Spotify: title, artists, album, duration (in ms),  cover_urls, sformat
+	// - AirPlay: title, artist, album, duration (in ms),  cover_url, sformat, oformat
+	// - Deezer:  title, artist, album, duration (in sec), cover_url, sformat,  decoder
+	// - Spotify: title, artist, album, duration (in ms),  cover_url, sformat
 
 	try {
 		var metadata = JSON.parse(data);
@@ -861,11 +861,11 @@ function updateInpsrcMeta(cmd, data) {
 	}
 
 	var title = metadata['title'];
-    var artist = cmd == 'get_spotmeta' ? metadata['artist'].split(';')[0] : metadata['artist'];
+	var artist = metadata['artist'];
     var album = metadata['album'];
 	var timeDivisor = (cmd.includes('_aplmeta') || cmd.includes('_spotmeta')) ? 1000 : 1;
     var duration = formatSongTime(Math.round(parseInt(metadata['duration']) / timeDivisor));
-    var coverURL = cmd == 'get_spotmeta' ? metadata['cover_url'].split(';')[0] : metadata['cover_url'];
+	var coverURL = metadata['cover_url'];
     var sformat = metadata['sformat'];
     if (title == '' || duration == '') {
         // Radio station
@@ -5350,7 +5350,7 @@ function getKeyOrValue (type, item) {
         // Thumbnail resolutions
         ['Auto','Auto'],['400px','400px,75'],['500px','500px,60'],['600px','600px,60'],
         // Dashboard commands
-        ['Discover (rebuild)','discover_players_rebuild_cache'],['Discover (update)','discover_players_update_cache'],
+        ['Discover (all)','discover_players_rebuild_cache'],['Discover (update)','discover_players_update_cache'],
         ['Update library','update_library'],['Regen thumbnails','regen_thmcache'],['Refresh screen','refresh_screen'],
         ['Shutdown','poweroff'],['Restart','reboot'],
         ['Play','play'],['Pause','pause'],['Stop','stop'],['Next','next'],['Previous','prev'],
