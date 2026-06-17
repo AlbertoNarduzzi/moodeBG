@@ -2425,13 +2425,12 @@ function chkClockRadio() {
 				$mpdCmd = 'play ' . parseMpdRespAsArray($resp)['Pos'];
 			}
 
+			// Set volume
+			sysCmd('/var/www/util/vol.sh ' . $_SESSION['clkradio_volume']);
 			// Send play cmd
 			sendMpdCmd($sock, $mpdCmd);
 			$resp = readMpdResp($sock);
 			closeMpdSock($sock);
-
-			// Set volume
-			sysCmd('/var/www/util/vol.sh ' . $_SESSION['clkradio_volume']);
 		}
 	} else if ($currentTime == $GLOBALS['clkradio_stop_time'] && $GLOBALS['clkradio_stop_days'][$currentDay] == '1') {
 		//workerLog('chkClockRadio(): stoptime=(' . $GLOBALS['clkradio_stop_time'] . ')');
@@ -2809,7 +2808,7 @@ function runQueuedJob() {
 			workerLog('worker: Truncate MPD log');
 			truncateMpdLog();
 			// Update library
-			$cmd = empty($_SESSION['w_queueargs']) ? 'update' : 'update "' . html_entity_decode($_SESSION['w_queueargs']) . '"';
+			$cmd = empty($_SESSION['w_queueargs']) ? 'update' : 'update "' . escapeDblQuotes(html_entity_decode($_SESSION['w_queueargs'])) . '"';
 			workerLog('mpdindex: Cmd (' . $cmd . ')');
 			workerLog('mpdindex: Scanning');
 			if (false === ($sock = openMpdSock('localhost', 6600))) {
