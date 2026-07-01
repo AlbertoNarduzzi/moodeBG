@@ -144,7 +144,9 @@ if (file_exists(BOOT_DIR . '/.fseventsd')) {
 }
 // - Delete session vars that have been removed or renamed
 $sessionVars = array(
-	'mpd_dbupdate_status'
+	'mpd_dbupdate_status',
+	'trackcover_url_cache',
+	'radio_track_covers'
 );
 foreach ($sessionVars as $var) {
 	sysCmd('moodeutl -D ' . $var);
@@ -1078,10 +1080,6 @@ if (!isset($_SESSION['cdspvolume_max_bt'])) {
 if (!isset($_SESSION['bluez_sbc_quality'])) {
 	$_SESSION['bluez_sbc_quality'] = 'xq+';
 }
-// ALSA output mode
-if (!isset($_SESSION['alsa_output_mode_bt'])) {
-	$_SESSION['alsa_output_mode_bt'] = '_audioout';
-}
 // Controller mode
 if (!isset($_SESSION['bluez_controller_mode'])) {
 	$_SESSION['bluez_controller_mode'] = 'dual';
@@ -1099,7 +1097,6 @@ if ($_SESSION['feat_bitmask'] & FEAT_BLUETOOTH) {
 }
 $status .= ', PIN: ' . (empty($_SESSION['bt_pin_code']) ? 'None' : 'Set');
 $status .= ', ALSA/CDSP max: ' . $_SESSION['alsavolume_max_bt'] . '%/' . $_SESSION['cdspvolume_max_bt'] . 'dB';
-$status .= ', ALSA out: ' . ALSA_OUTPUT_MODE_BT_NAME[$_SESSION['alsa_output_mode_bt']];
 $status .= ', Transport: ' . $_SESSION['bluez_controller_mode'];
 workerLog('worker: Bluetooth:       ' . $status);
 
@@ -1527,8 +1524,7 @@ $validIPAddress = ($_SESSION['ipaddress'] != '0.0.0.0' && $wlan0Ip != explode('/
 $_SESSION['updater_available_update'] = updaterAutoCheck($validIPAddress);
 
 // Radio track covers
-workerLog('worker: Radio track covers:   ' . lcfirst($_SESSION['radio_track_covers']));
-workerLog('worker: iTunes query timeout: ' . $_SESSION['itunes_query_timeout'] . ' sec(s)');
+workerLog('worker: Radio covers:         ' . $_SESSION['radio_covers']);
 
 // Automatic CoverView (Preferences)
 workerLog('worker: Auto-CoverView:       ' . ($_SESSION['auto_coverview'] == '-on' ? 'on' : 'off'));
@@ -1652,12 +1648,12 @@ if (!isset($_SESSION['lib_fv_only'])) {
 	$_SESSION['lib_fv_only'] = 'off';
 }
 
-// Radio track cover URL cache
-if (!isset($_SESSION['trackcover_url_cache'])) {
-	$_SESSION['trackcover_url_cache'] = '';
+// Radio cover URL cache
+if (!isset($_SESSION['radiocover_url_cache'])) {
+	$_SESSION['radiocover_url_cache'] = '';
 }
 // Empty cache
-$_SESSION['trackcover_url_cache'] = array('' => ''); // trackTitle => URL
+$_SESSION['radiocover_url_cache'] = array('' => ''); // Title => URL
 
 // Metadata file
 if (!isset($_SESSION['extmeta'])) {

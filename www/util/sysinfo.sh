@@ -203,7 +203,7 @@ APPEARANCE_SETTINGS() {
 	echo -e "\nThumbnail resolution\t= $library_hiresthm\c"
 	echo -e "\nShow Queue thumbs\t= $playlist_art\c"
 	echo -e "\nShow tagview covers\t= $library_tagview_covers\c"
-	echo -e "\nRadio track covers\t= $radio_track_covers\c"
+	echo -e "\nRadio covers\t\t= $radio_covers\c"
 	echo -e "\niTunes query timeout\t= $itunes_query_timeout\c"
 	echo -e "\n\nLibrary\c"
 	echo -e "\n----------------------\c"
@@ -307,7 +307,6 @@ RENDERER_SETTINGS() {
 		echo -e "\nCDSP max volume\t\t= $CDSPVOLUME_MAX_BT dB\c"
 		echo -e "\nResume MPD\t\t= $rsmafterbt\c"
 		echo -e "\nPCM buffer time\t\t= $bluez_pcm_buffer ($micro_symbol)\c"
-		echo -e "\nALSA output mode\t= $ALSA_OUTPUT_MODE_BT\c"
 		echo -e "\nController mode\t\t= $bluez_controller_mode\c"
 		echo -e "\nActivity timeout\t= $BT_AUTO_DISCONNECT\n"
 	fi
@@ -581,8 +580,6 @@ BLUETOOTH_VER=$(bluetoothd -v)
 BLUEALSA_VER=$(bluealsa -V 2> /dev/null)
 PARING_AGENT_VER=$(dpkg -l | grep bluez-tools | awk '{print $3}' | cut -d"~" -f1)
 PI_BLUETOOTH_VER=$(dpkg -l | grep pi-bluetooth | awk '{print $3}')
-output_mode=$(moodeutl -d -gv alsa_output_mode_bt)
-[[ $output_mode = "_audioout" ]] && ALSA_OUTPUT_MODE_BT="Default (_audioout)" || ALSA_OUTPUT_MODE_BT="Compatibility (plughw)"
 bluez_controller_mode=$(moodeutl -d -gv bluez_controller_mode)
 TMP=$(moodeutl -d -gv bt_pin_code)
 [[ "$TMP" = "None" ]] && BT_PIN_CODE="None" || BT_PIN_CODE="******"
@@ -801,7 +798,7 @@ else
 fi
 pkgid_suffix=${arr[64]}
 lib_pos=${arr[65]}
-radio_track_covers=${arr[66]}
+radio_covers=${arr[66]}
 deezactive=${arr[67]}
 peppy_scn_blank_active=${arr[68]}
 [[ "${arr[69]}" = "1" ]] && rsmafterbt="Yes" || rsmafterbt="No"

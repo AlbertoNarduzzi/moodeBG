@@ -23,7 +23,7 @@
 		</p>
 		<h5>Release Information</h5>
 		<ul>
-			<li>Release: 10.2.4 2026-MM-DD</li> <!-- NOTE: getMoodeRel() parses this  -->
+			<li>Release: 10.2.5 2026-MM-DD</li> <!-- NOTE: getMoodeRel() parses this  -->
 			<li>Maintainer: Tim Curtis &copy; 2014</li>
 			<li>Documentation: <a class="moode-about-link target-blank-link" href="./relnotes.txt" target="_blank">View</a> release notes,&nbsp<a class="moode-about-link target-blank-link" href="https://github.com/moode-player/docs/blob/main/setup_guide.md#setup-guide-" target="_blank">View</a> setup guide</li>
 			<li>Contributors:  <a class="moode-about-link target-blank-link" href="./CONTRIBS.html" target="_blank">View</a> contributors</li>
@@ -69,6 +69,7 @@
 				<?php if ($_SESSION['feat_bitmask'] & FEAT_INPSOURCE) { ?>
 					<li><a href="inp-config.php" class="btn btn-large"><i class="fa-solid fa-sharp fa-dial"></i><br>Input select</a></li>
 				<?php } ?>
+				<li><a href="rcp-config.php" class="btn btn-large"><i class="fa-solid fa-sharp fa-album-collection"></i><br>Radio Cover+</a></li>
 			</ul>
 		</div>
 	</div>
