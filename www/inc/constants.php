@@ -34,6 +34,9 @@ const MPD_LOG = '/var/log/mpd/log';
 // Currentsong / Now playing
 const CURRENTSONG_TXT = '/var/local/www/currentsong.txt';
 const CURRENTSONG_TXT_TMP = '/tmp/currentsong.txt';
+// Radiocover plus
+const RADIOCOVER_PLUS_CFG = '/etc/radiocover-plus/config.txt';
+const RADIOCOVER_PLUS_LOG = '/var/log/moode_radiocover_plus.log';
 // AirPlay, Deezer Connect and Spotify Connect
 const APLMETA_CACHE_FILE = '/var/local/www/aplmeta.json';
 const DEEZMETA_CACHE_FILE = '/var/local/www/deezmeta.json';
@@ -268,7 +271,6 @@ const ALSA_DEFAULT_MIXER_NAME_I2S = 'Digital';
 const ALSA_DEFAULT_MIXER_NAME_INTEGRATED = 'PCM';
 // ALSA output mode names
 const ALSA_OUTPUT_MODE_NAME = array('plughw' => 'Default', 'hw' => 'Direct', 'iec958' => 'IEC958');
-const ALSA_OUTPUT_MODE_BT_NAME = array('_audioout' => 'Standard', 'plughw' => 'Compatibility');
 // ALSA HDMI IEC958
 const ALSA_IEC958_DEVICE = 'default:vc4hdmi';
 const ALSA_IEC958_FORMAT = 'IEC958_SUBFRAME_LE';
