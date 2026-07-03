@@ -97,6 +97,27 @@ const DEFAULT_RX_COVER = 'images/default-rx-cover.jpg';
 const DEFAULT_PLAYLIST_COVER = '/var/www/images/default-playlist-cover.jpg';
 const DEFAULT_NOTFOUND_COVER = '/var/www/images/default-notfound-cover.jpg';
 
+// Playlist cover thumbnail failed to load (e.g. an imported playlist with no cover
+// file) → replace the broken image with a default playlist icon. Also drop the
+// text-cover overlay, which would be redundant with the .playlist-name shown below.
+function plCoverFallback(img) {
+	var thumb = img.parentNode;
+	if (thumb) {
+		// Centre the thumbnail box horizontally (it isn't, with just the icon)
+		thumb.style.marginLeft = 'auto';
+		thumb.style.marginRight = 'auto';
+	}
+	var textCover = thumb ? thumb.querySelector('.plview-text-cover-div') : null;
+	if (textCover) {
+		textCover.parentNode.removeChild(textCover);
+	}
+	img.outerHTML = '<i class="fa-solid fa-sharp fa-list-music" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:calc(var(--thumbimagesize)/2);"></i>';
+}
+// Same default icon for the small cover preview in the Edit-playlist modal
+function plPreviewFallback(img) {
+	img.outerHTML = '<i class="fa-solid fa-sharp fa-list-music" style="font-size:32px;line-height:1;"></i>';
+}
+
 var UI = {
     knob: null,
     path: '',
@@ -1962,6 +1983,8 @@ function sendQueueCmd(cmd, path) {
 function renderFolderView(data, path, searchstr) {
 	UI.path = path;
     $('#db-path').text(path);
+    // Import targets the playlists at the root, so only offer it there
+    $('#btn-db-import').toggle(path == '');
 
 	// Separate out dirs, playlists, files, exclude the RADIO folder
 	var dirs = [];
@@ -2487,7 +2510,7 @@ function renderPlaylistView () {
             // Construct playlist entries
             var imgUrl = playlists[i].cover == 'local' || playlists[i].cover == 'default' ? 'imagesw/playlist-covers/' + playlists[i].name + '.jpg' : playlists[i].cover;
     		output += '<li id="pl-entry-' + (i + 1) + '" data-path="' + playlists[i].name + '">';
-    		output += '<div class="db-icon db-song db-browse db-action">' + plViewLazy + encodeURIComponent(imgUrl) + '">';
+    		output += '<div class="db-icon db-song db-browse db-action">' + plViewLazy + encodeURIComponent(imgUrl) + '" onerror="plCoverFallback(this)">';
             output += playlists[i].cover == 'default' ? '<div class="plview-text-cover-div"><span class="plview-text-cover">' + playlists[i].name + '</span></div>' : '';
             output += '</div><div class="cover-menu" data-toggle="context" data-target="#context-menu-playlist-item"></div></div><div class="db-entry db-song db-browse"></div>';
             output += '<span class="playlist-name">' + playlists[i].name + '</span>';
@@ -2921,6 +2944,9 @@ $(document).on('click', '.context-menu a', function(e) {
         //
         // Context menu items
         //
+        case 'export_playlist':
+            window.location = 'command/playlist.php?cmd=export_playlist&name=' + encodeURIComponent(path);
+            break;
         case 'add_item':
         case 'play_item':
         case 'clear_play_item':
@@ -3132,7 +3158,7 @@ $(document).on('click', '.context-menu a', function(e) {
                 $('#edit-playlist-name').val(path);
                 $('#edit-plcoverimage').val('');
                 $('#info-toggle-edit-plcoverimage').css('margin-left','60px');
-                $('#preview-edit-plcoverimage').html('<img src="../imagesw/playlist-covers/' + path + '.jpg">');
+                $('#preview-edit-plcoverimage').html('<img src="../imagesw/playlist-covers/' + path + '.jpg" onerror="plPreviewFallback(this)">');
                 $('#edit-playlist-tags').css('margin-top', '20px');
                 $('#edit-playlist-genre').val(data['genre']);
 
@@ -3453,7 +3479,8 @@ $(document).on('click', '.context-menu a', function(e) {
                 $('#hires-thumbnails span').text(getKeyOrValue('key', SESSION.json['library_hiresthm']));
                 $('#playqueue-art-enabled span').text(SESSION.json['playlist_art']);
                 $('#show-tagview-covers span').text(SESSION.json['library_tagview_covers']);
-				$('#show-radio-track-covers span').text(SESSION.json['radio_covers']);
+				$('#show-radio-covers span').text(SESSION.json['radio_covers']);
+				$('#itunes-query-timeout span').text(SESSION.json['itunes_query_timeout']);
 
                 // Library
 				// One-touch actions
@@ -3668,7 +3695,7 @@ $('#btn-preferences-update').click(function(e){
     if (SESSION.json['library_hiresthm'] != getKeyOrValue('value', $('#hires-thumbnails span').text())) {regenThumbsReqd = true;}
     if (SESSION.json['playlist_art'] != $('#playqueue-art-enabled span').text()) {playqueueArtChange = true;}
     if (SESSION.json['library_tagview_covers'] != $('#show-tagview-covers span').text()) {libraryOptionsChange = true;}
-	if (SESSION.json['radio_covers'] != $('#show-radio-track-covers span').text()) {radioCoversChange = true;}
+	if (SESSION.json['radio_covers'] != $('#show-radio-covers span').text()) {radioCoversChange = true;}
 
     // Library
 	// One-touch actions
@@ -3731,8 +3758,8 @@ $('#btn-preferences-update').click(function(e){
     SESSION.json['library_hiresthm'] = getKeyOrValue('value', $('#hires-thumbnails span').text());
     SESSION.json['playlist_art'] = $('#playqueue-art-enabled span').text();
     SESSION.json['library_tagview_covers'] = $('#show-tagview-covers span').text();
-	SESSION.json['radio_covers'] = $('#show-radio-track-covers span').text();
-
+	SESSION.json['radio_covers'] = $('#show-radio-covers span').text();
+	SESSION.json['itunes_query_timeout'] = $('#itunes-query-timeout span').text();
     // Library
 	// One-touch actions
     SESSION.json['library_onetouch_album'] = $('#onetouch_album span').text();
@@ -3899,8 +3926,8 @@ $('#btn-preferences-update').click(function(e){
         function() {
             if (extraTagsChange || scnSaverStyleChange || scnSaverModeChange || scnSaverLayoutChange ||
                 playHistoryChange || libraryOptionsChange || clearLibcacheAllReqd || lazyLoadChange ||
-				radioCoversChange ||
-                (SESSION.json['bgimage'] != '' && SESSION.json['cover_backdrop'] == 'No') || UI.bgImgChange == true) {
+                (SESSION.json['bgimage'] != '' && SESSION.json['cover_backdrop'] == 'No') || UI.bgImgChange == true
+			) {
                 notify(NOTIFY_TITLE_INFO, 'settings_updated_with_msg', ' The page will automatically refresh to make the settings effective.');
                 setTimeout(function() {
                     location.reload(true);
