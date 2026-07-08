@@ -12,10 +12,11 @@ var RB = {
     offset: 0,          // Search pagination offset
     limit: 28,          // Page size (fixed)
     listsLoaded: {recent: false},
-    countriesLoaded: false
+    countriesLoaded: false,
+    menuUrl: ''         // URL of the tile whose context menu is open (Remove-from-recent target)
 };
 
-var RB_API = 'command/radiobrowser.php';
+var RB_API = 'command/radio-browser.php';
 
 // Build a station object from a tile's data-* attributes
 function rbStationFromTile(li) {
@@ -37,7 +38,7 @@ function rbStationFromTile(li) {
 function rbLogoUrl(s) {
     if (s.favicon) {
         if (/^https?:\/\//i.test(s.favicon)) {
-            return RB_API + '?cmd=logo&u=' + encodeURIComponent(s.favicon);
+            return RB_API + '?cmd=logo&url=' + encodeURIComponent(s.favicon);
         }
         return s.favicon;
     }
@@ -137,8 +138,8 @@ function rbSearch(offset, append) {
     RB.offset = offset || 0;
     var params = {
         name: $('#rb-filter').val().trim(),
-        countrycode: $('#rb-country').val(),
-        tag: $('#rb-genre').val(),
+        countrycode: $('#rb-country').data('value') || '',
+        tag: $('#rb-genre').data('value') || '',
         offset: RB.offset,
         limit: RB.limit
     };
@@ -171,6 +172,21 @@ function rbLoadRecent() {
     });
 }
 
+// A play just updated the recent list server-side (cmd=play → rbAddRecent). Reload it now if
+// the Recent tab is showing, else force a reload the next time it's opened.
+function rbMarkRecentStale() {
+    RB.listsLoaded.recent = false;
+    if (RB.tab === 'recent') { rbLoadRecent(); }
+}
+
+// Native-style client-side filter over the loaded Recent tiles (mirrors the #ra-filter handler)
+function rbFilterRecent(filter) {
+    filter = (filter || '').trim();
+    $('#rb-covers-recent li').each(function() {
+        $(this).toggle($(this).text().search(new RegExp(filter, 'i')) >= 0);
+    });
+}
+
 // --- Actions --------------------------------------------------------------
 
 // Pre-register the stream in RADIO.json so the native now-playing renderer resolves it
@@ -200,6 +216,7 @@ function rbPlay(li) {
         success: function(data) {
             notify(data && data.success ? NOTIFY_TITLE_INFO : NOTIFY_TITLE_ALERT,
                 'mpd_error', data ? data.message : 'Play failed', NOTIFY_DURATION_SHORT);
+            rbMarkRecentStale(); // the play was recorded server-side; refresh the Recent tab
         }
     });
 }
@@ -210,6 +227,12 @@ function rbToggleFavorite(li) {
     if (!station.url) return;
     var isAdded = $li.find('.rb-fav-toggle').hasClass('added');
     var cmd = isAdded ? 'remove' : 'add';
+
+	if (cmd == 'add') {
+		// Because the add is via submitJob() to worker.php daemon which gets processed up in its polling loop
+		notify(NOTIFY_TITLE_INFO, 'rb_message', 'Adding station to Favorites... ', NOTIFY_DURATION_INFINITE);
+	}
+
     $.ajax({
         url: RB_API + '?cmd=' + cmd,
         type: 'POST',
@@ -222,7 +245,8 @@ function rbToggleFavorite(li) {
                 RB.favoritesDirty = true; // refresh the native Radio grid when we return to it
             }
             notify(data && data.success ? NOTIFY_TITLE_INFO : NOTIFY_TITLE_ALERT,
-                'mpd_error', data ? data.message : 'Action failed', NOTIFY_DURATION_SHORT);
+                'mpd_error', data ? data.message : 'Action failed',
+				NOTIFY_DURATION_SHORT);
             // 'update RADIO' lights the busy-spinner; clear it after it settles (native pattern)
             setTimeout(function() { $('.busy-spinner').hide(); }, ONE_SEC_TIMEOUT);
         }
@@ -248,6 +272,15 @@ function rbShowTab(tab) {
     $('#btn-rb-tab-' + tab).addClass('active');
     $('.rb-tab-pane').addClass('hide');
     $('#rb-tab-' + tab).removeClass('hide');
+    // Country/genre are radio-browser.info API params — no meaning on the client-filtered
+    // Recent tab. The search box stays, but switches to a native-style live filter (below).
+    $('#rb-filters').toggleClass('hide', tab === 'recent');
+    $('#rb-filter').attr('placeholder', tab === 'recent' ? 'search' : 'search radio-browser.info');
+    // The search box is shared by both tabs and means different things per tab — reset it and
+    // clear any leftover Recent filter on every switch so each tab starts clean.
+    $('#rb-filter').val('');
+    $('#btn-rb-search-reset').addClass('hide');
+    $('#rb-covers-recent li').show();
 
     if (tab === 'search' && $('#rb-covers-search li').length === 0) {
         rbSearch(0);
@@ -261,34 +294,36 @@ function rbOnViewActive() {
     if (!RB.countriesLoaded) {
         rbLoadCountriesAndGenres();
     }
-    // Refresh the dropdowns now the panel is visible (selectpicker init'd while hidden)
-    $('#rb-country, #rb-genre').selectpicker('refresh');
     rbShowTab(RB.tab);
+}
+
+// Fill a combobox <ul> with option rows; items[0] is the 'All' reset row (empty value)
+function rbFillCombo(inputId, items) {
+    var html = '';
+    items.forEach(function(it) {
+        html += '<li><a href="#notarget" class="external" data-value="' + rbEscapeHtml(it.value) + '">' + rbEscapeHtml(it.label) + '</a></li>';
+    });
+    $('#' + inputId).siblings('.dropdown-menu').html(html);
 }
 
 function rbLoadCountriesAndGenres() {
     RB.countriesLoaded = true;
     $.getJSON(RB_API + '?cmd=countries', function(data) {
         if (data && data.success) {
-            var opts = '<option value="">All countries</option>';
+            var items = [{value: '', label: 'All countries'}];
             data.countries.forEach(function(c) {
-                if (c.iso_3166_1 && c.name) {
-                    opts += '<option value="' + rbEscapeHtml(c.iso_3166_1) + '">' + rbEscapeHtml(c.name) + '</option>';
-                }
+                if (c.iso_3166_1 && c.name) { items.push({value: c.iso_3166_1, label: c.name}); }
             });
-            $('#rb-country').html(opts).selectpicker('refresh');
+            rbFillCombo('rb-country', items);
         }
     });
     $.getJSON(RB_API + '?cmd=genres', function(data) {
         if (data && data.success) {
-            var opts = '<option value="">All genres</option>';
+            var items = [{value: '', label: 'All genres'}];
             data.genres.forEach(function(g) {
-                if (g.name) {
-                    var label = g.name.charAt(0).toUpperCase() + g.name.slice(1);
-                    opts += '<option value="' + rbEscapeHtml(g.name) + '">' + rbEscapeHtml(label) + '</option>';
-                }
+                if (g.name) { items.push({value: g.name, label: g.name.charAt(0).toUpperCase() + g.name.slice(1)}); }
             });
-            $('#rb-genre').html(opts).selectpicker('refresh');
+            rbFillCombo('rb-genre', items);
         }
     });
 }
@@ -306,16 +341,49 @@ $(document).ready(function() {
 
     $('#rb-filter').on('keyup', function(e) {
         $('#btn-rb-search-reset').toggleClass('hide', $(this).val() === '');
-        if (e.which === 13) { rbSearch(0); }
+        if (RB.tab === 'recent') {
+            // Native-style client-side filter of the already-loaded Recent tiles (debounced)
+            clearTimeout(searchTimer);
+            var val = $(this).val();
+            searchTimer = setTimeout(function() { rbFilterRecent(val); }, SEARCH_TIMEOUT);
+        } else if (e.which === 13) {
+            rbSearch(0);
+        }
     });
     $('#btn-rb-search-reset').click(function() {
         $('#rb-filter').val('');
         $(this).addClass('hide');
-        rbSearch(0);
+        if (RB.tab === 'recent') { rbFilterRecent(''); }
+        else { rbSearch(0); }
     });
-    $('#rb-country, #rb-genre').change(function() { rbSearch(0); });
-    // Tag 'external' so the global links.js skips navigation but the dropdown still closes
-    $('#rb-filters').on('click', '.dropdown-menu li a', function() { $(this).addClass('external'); });
+    // Country/genre comboboxes: searchable inputs backed by a moOde-styled .dropdown-menu.
+    // Open on focus, filter as you type; picking a row sets the input text + its data-value
+    // (read by rbSearch). Clearing the box resets to 'All'.
+    $('#rb-filters')
+        .on('focus click', 'input', function() {
+            $(this).closest('.rb-combo').addClass('open').find('.dropdown-menu li').show();
+        })
+        .on('keyup', 'input', function() {
+            var $input = $(this), q = $input.val().trim().toLowerCase();
+            $input.closest('.rb-combo').addClass('open')
+                .find('.dropdown-menu li').each(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(q) >= 0);
+                });
+            if (q === '' && ($input.data('value') || '') !== '') { $input.data('value', ''); rbSearch(0); }
+        })
+        .on('click', '.dropdown-menu li a', function(e) {
+            e.preventDefault();
+            var $a = $(this), $combo = $a.closest('.rb-combo'), code = $a.data('value') || '';
+            $combo.find('input').data('value', code).val(code === '' ? '' : $a.text());
+            $combo.removeClass('open');
+            rbSearch(0);
+        });
+    // Close an open combobox when clicking outside it
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#rb-filters .rb-combo').length) {
+            $('#rb-filters .rb-combo').removeClass('open');
+        }
+    });
 
     $('#rb-covers-search').on('click', '#btn-rb-showmore', function() { rbSearch(RB.offset + RB.limit, true); });
 
@@ -334,10 +402,29 @@ $(document).ready(function() {
     });
     // Register the station for now-playing; the native .cover-menu handler queues data-path
     $('#container-radio-browser').on('click', '.cover-menu', function() {
+        // 'Remove from recent' only makes sense on the Recent tab
+        $('#rb-ctx-remove-recent').toggleClass('hide', RB.tab !== 'recent');
         var station = rbStationFromTile($(this).closest('li'));
         if (!station.url) return;
+        RB.menuUrl = station.url; // target for the Remove-from-recent action
         rbRegisterInRadioJson(station);
         $.ajax({ url: RB_API + '?cmd=register', type: 'POST',
                  contentType: 'application/json', data: JSON.stringify(station) });
+    });
+
+    $('#context-menu-radio-browser-item a[data-cmd="rb_remove_recent"]').click(function() {
+        if (!RB.menuUrl) return;
+        $.ajax({
+            url: RB_API + '?cmd=remove_recent',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({url: RB.menuUrl}),
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.success) { rbLoadRecent(); }
+                notify(data && data.success ? NOTIFY_TITLE_INFO : NOTIFY_TITLE_ALERT,
+                    'mpd_error', data ? data.message : 'Action failed', NOTIFY_DURATION_SHORT);
+            }
+        });
     });
 });

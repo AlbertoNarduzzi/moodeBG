@@ -254,7 +254,7 @@
 	<!-- RADIO VIEW -->
 	<div id="radio-panel" class="tab-pane">
 		<div id="container-radio">
-			<!-- Radio native view (explore toggle off) -->
+			<!-- Radio view native (toggle off) -->
 			<div class="container-radio-native">
 					<div class="btnlist btnlist-top btnlist-top-ra">
 						<button aria-label="Radio Manager" id="btn-ra-manager" class="btn"><i class="fa-solid fa-sharp fa-gear-complex"></i></button>
@@ -266,7 +266,7 @@
 						</div>
 						<button aria-label="Reset" id="btn-ra-search-reset" class="btn hide" type="reset" value="reset"><i class="fa-regular fa-sharp fa-times-circle"></i></button>
 					</form>
-					<button aria-label="Explore radio-browser" class="btn btn-toggle ra-explore-btn"><i class="fa-solid fa-sharp fa-globe"></i></button>
+					<button aria-label="Radio Browser" class="btn btn-toggle rb-toggle-btn"><i class="fa-solid fa-sharp fa-globe"></i></button>
 				</div>
 
 				<div id="database-radio">
@@ -276,9 +276,9 @@
 					<ul><li>#</li><li>a</li><li>b</li><li>c</li><li>d</li><li>e</li><li>f</li><li>g</li><li>h</li><li>i</li><li>j</li><li>k</li><li>l</li><li>m</li><li>n</li><li>o</li><li>p</li><li>q</li><li>r</li><li>s</li><li>t</li><li>u</li><li>v</li><li>w</li><li>x</li><li>y</li><li>z</li></ul>
 				</div>
 			</div>
-			<!-- end Radio native view -->
+			<!-- End Radio view native -->
 
-			<!-- Radio Browser explorer (explore toggle on) -->
+			<!-- Radio Browser (toggle on) -->
 			<div id="container-radio-browser" class="hide">
 				<div class="btnlist btnlist-top btnlist-top-rb">
 					<button aria-label="Search" id="btn-rb-tab-search" class="btn rb-tab active">Search</button>
@@ -291,10 +291,16 @@
 						<button aria-label="Reset" id="btn-rb-search-reset" class="btn hide" type="reset" value="reset"><i class="fa-regular fa-sharp fa-times-circle"></i></button>
 					</form>
 					<div class="controls" id="rb-filters">
-						<select id="rb-country" class="config-select-large" data-size="10"><option value="">All countries</option></select>
-						<select id="rb-genre" class="config-select-large" data-size="10"><option value="">All genres</option></select>
+						<div class="rb-combo bootstrap-select">
+							<input id="rb-country" type="text" placeholder="All countries" autocomplete="off">
+							<ul class="dropdown-menu" role="menu"></ul>
+						</div>
+						<div class="rb-combo bootstrap-select">
+							<input id="rb-genre" type="text" placeholder="All genres" autocomplete="off">
+							<ul class="dropdown-menu" role="menu"></ul>
+						</div>
 					</div>
-					<button aria-label="Explore radio-browser" class="btn btn-toggle ra-explore-btn active"><i class="fa-solid fa-sharp fa-globe"></i></button>
+					<button aria-label="Radio Browser" class="btn btn-toggle rb-toggle-btn active"><i class="fa-solid fa-sharp fa-globe"></i></button>
 				</div>
 				<!-- Search tab -->
 				<div id="rb-tab-search" class="rb-tab-pane">
@@ -310,7 +316,7 @@
 				</div>
 				<div class="rb-attribution">Powered by <a class="target-blank-link" href="https://www.radio-browser.info" target="_blank">radio-browser.info</a> &middot; integration derived from RubaTron's Radio Browser extension</div>
 			</div>
-			<!-- end Radio Browser explorer -->
+			<!-- End Radio Browser -->
 		</div>
 	</div>
 
@@ -2168,6 +2174,7 @@
 							<ul class="dropdown-menu custom-select inner" role="menu">
 								<li class="modal-dropdown-text"><a href="#notarget" data-cmd="edit-station-type-sel"><span class="text">Regular</span></a></li>
 								<li class="modal-dropdown-text"><a href="#notarget" data-cmd="edit-station-type-sel"><span class="text">Favorite</span></a></li>
+								<li id="edit-station-type-fb" class="modal-dropdown-text"><a href="#notarget" data-cmd="edit-station-type-sel"><span class="text">Favorite (Radio Browser)</span></a></li>
 								<li class="modal-dropdown-text"><a href="#notarget" data-cmd="edit-station-type-sel"><span class="text">Hidden</span></a></li>
 							</ul>
 						</div>
@@ -2331,6 +2338,7 @@
 					<div class="dropdown-menu open">
 						<ul class="dropdown-menu custom-select inner" role="menu">
 							<li class="modal-dropdown-text"><a href="#notarget" data-cmd="radioview-group-method-sel"><span class="text">Favorites first</span></a></li>
+							<li class="modal-dropdown-text"><a href="#notarget" data-cmd="radioview-group-method-sel"><span class="text">Favorites first (group remaining)</span></a></li>
 							<li class="modal-dropdown-text"><a href="#notarget" data-cmd="radioview-group-method-sel"><span class="text">Sort tag</span></a></li>
 							<li class="modal-dropdown-text"><a href="#notarget" data-cmd="radioview-group-method-sel"><span class="text">No grouping</span></a></li>
 						</ul>
@@ -3011,6 +3019,7 @@
 			<li><a href="#notarget" data-cmd="add_item_next"><i class="fa-regular fa-sharp fa-plus-circle sx"></i> Add next</a></li>
 			<li><a href="#notarget" data-cmd="play_item_next"><i class="fa-regular fa-sharp fa-play-circle sx"></i> Play next</a></li>
 			<li class="menu-separator"><a href="#notarget" data-cmd="get_playlist_names"><i class="fa-regular fa-sharp fa-list-music sx"></i> Add to playlist</a></li>
+			<li id="rb-ctx-remove-recent" class="menu-separator hide"><a href="#notarget" data-cmd="rb_remove_recent"><i class="fa-regular fa-sharp fa-circle-xmark sx"></i> Remove from recent</a></li>
 		</ul>
 	</div>
 

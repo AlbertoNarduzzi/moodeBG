@@ -6,7 +6,7 @@
  * radio-browser.info integration — function library (radio-browser.info client,
  * cache, cfg_radio station read/write, logo proxy). Derived from RubaTron's Radio
  * Browser extension for moOde (GPL-3.0-or-later), re-implemented in moOde's native
- * conventions (cfg_radio, submitJob, mpd.php). Included by command/radiobrowser.php.
+ * conventions (cfg_radio, submitJob, mpd.php). Included by command/radio-browser.php.
 */
 
 require_once __DIR__ . '/common.php';
@@ -131,33 +131,7 @@ function rbCacheGet($key, $ttl) {
 	return false;
 }
 function rbCacheSet($key, $data) {
-	if (!is_dir(RADIOBROWSER_CACHE)) {
-		@mkdir(RADIOBROWSER_CACHE, 0775, true);
-	}
 	@file_put_contents(RADIOBROWSER_CACHE . '/' . $key . '.json', json_encode($data));
-}
-
-// Download a station favicon into the local image cache; return a same-origin web path
-function rbCacheImage($url) {
-	if (empty($url) || str_contains($url, 'encrypted-tbn0.gstatic.com')) {
-		return '';
-	}
-	$hash = md5($url);
-	$file = RADIOBROWSER_IMAGE_CACHE . '/' . $hash . '.png';
-	$webPath = 'imagesw/radio-logos/cache/' . $hash . '.png';
-	if (file_exists($file) && (time() - filemtime($file) < RADIOBROWSER_CACHE_TTL_STATIC)) {
-		return $webPath;
-	}
-	$data = rbHttpGet($url, 3);
-	if ($data !== false && strlen($data) > 100 && strlen($data) < 51200) {
-		if (!is_dir(RADIOBROWSER_IMAGE_CACHE)) {
-			@mkdir(RADIOBROWSER_IMAGE_CACHE, 0775, true);
-		}
-		if (@file_put_contents($file, $data)) {
-			return $webPath;
-		}
-	}
-	return '';
 }
 
 // --- Station logo handling (ported from RubaTron's Radio Browser api.php) --------------
@@ -195,6 +169,7 @@ function rbResizeAndSave($src, $srcW, $srcH, $size, $outPath, $quality = 85) {
 	$x = (int)(($size - $newW) / 2);
 	$y = (int)(($size - $newH) / 2);
 	imagecopyresampled($canvas, $src, $x, $y, 0, 0, $newW, $newH, $srcW, $srcH);
+	$result = imagejpeg($canvas, $outPath, $quality);
 	$saved = @imagejpeg($canvas, $outPath, $quality);
 	imagedestroy($canvas);
 	return $saved;
@@ -202,23 +177,33 @@ function rbResizeAndSave($src, $srcW, $srcH, $size, $outPath, $quality = 85) {
 
 // Save station logo (400/200/80) to moOde's radio-logos folder. Returns true if all saved.
 function rbSaveLogo($name, $imageData) {
-	$src = @imagecreatefromstring($imageData);
+	// The RADIO_LOGOS_ROOT dirs are owned by root so use worker.php job processor which runs as root
+	phpSession('open');
+	submitJob('set_rblogo_image', $name . ',' . $imageData);
+	phpSession('close');
+	waitWorker('rbSaveLogo');
+	return true;
+
+	// NOTE: Code copied to case 'set_rblogo_image' in worker.php
+	/*$src = @imagecreatefromstring($imageData);
 	if (!$src) {
 		return false;
 	}
 	$w = imagesx($src);
 	$h = imagesy($src);
+
 	if (!is_dir(RADIO_LOGOS_ROOT)) {
 		@mkdir(RADIO_LOGOS_ROOT, 0755, true);
 	}
 	if (!is_dir(RADIO_LOGOS_ROOT . 'thumbs/')) {
 		@mkdir(RADIO_LOGOS_ROOT . 'thumbs/', 0755, true);
 	}
+
 	$ok1 = rbResizeAndSave($src, $w, $h, 400, RADIO_LOGOS_ROOT . $name . '.jpg');
 	$ok2 = rbResizeAndSave($src, $w, $h, 200, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '.jpg');
 	$ok3 = rbResizeAndSave($src, $w, $h, 80, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg');
 	imagedestroy($src);
-	return $ok1 && $ok2 && $ok3;
+	return $ok1 && $ok2 && $ok3;*/
 }
 
 // Ensure the station has local logo files: download+convert the favicon, else copy the
@@ -251,9 +236,6 @@ function rbGetRecent() {
 	return is_array($data) ? $data : array();
 }
 function rbAddRecent($station) {
-	if (!is_dir(RADIOBROWSER_CACHE)) {
-		@mkdir(RADIOBROWSER_CACHE, 0775, true);
-	}
 	$fp = @fopen(RADIOBROWSER_RECENT_FILE, 'c+');
 	if (!$fp) {
 		return;
@@ -277,11 +259,33 @@ function rbAddRecent($station) {
 	flock($fp, LOCK_UN);
 	fclose($fp);
 }
+function rbRemoveRecent($url) {
+	$fp = @fopen(RADIOBROWSER_RECENT_FILE, 'c+');
+	if (!$fp) {
+		return;
+	}
+	if (!flock($fp, LOCK_EX)) {
+		fclose($fp);
+		return;
+	}
+	$content = stream_get_contents($fp);
+	$list = ($content !== '' && ($d = json_decode($content, true)) && is_array($d)) ? $d : array();
+	$url = trim($url);
+	$list = array_values(array_filter($list, function ($item) use ($url) {
+		return $item['url'] !== $url;
+	}));
+	ftruncate($fp, 0);
+	rewind($fp);
+	fwrite($fp, json_encode($list, JSON_PRETTY_PRINT));
+	fflush($fp);
+	flock($fp, LOCK_UN);
+	fclose($fp);
+}
 
-// Normalised URL set of the user's favorites (cfg_radio type='f')
+// Normalised URL set of the user's favorites (cfg_radio type='fb')
 function rbFavoriteUrls($dbh) {
 	$urls = array();
-	$rows = sqlQuery("SELECT station FROM cfg_radio WHERE type='f'", $dbh);
+	$rows = sqlQuery("SELECT station FROM cfg_radio WHERE type='fb'", $dbh);
 	if (is_array($rows)) {
 		foreach ($rows as $r) {
 			$urls[rbNormalizeUrl($r['station'])] = true;
@@ -304,8 +308,8 @@ function rbShapeResults($data, $dbh) {
 		// Return the raw favicon URL — do NOT cache inline here. Caching 30 external
 		// images synchronously in one request stalls search for tens of seconds (a
 		// slow/dead host blocks the whole loop). The tile <img> instead points at the
-		// same-origin 'logo' proxy below, so images are fetched+cached per-image and in
-		// parallel by the browser (rbCacheImage mechanism preserved, just on demand).
+		// same-origin 'logo' proxy below (rbServeLogo), so images are fetched+cached
+		// per-image and in parallel by the browser, on demand.
 		$favicon = trim($s['favicon'] ?? '');
 		$station = array(
 			'name' => trim($s['name'] ?? ''),
@@ -344,7 +348,7 @@ function rbWriteStation($s) {
 		'NULL,' .
 		"'" . SQLite3::escapeString($s['url']) . "'," .
 		"'" . SQLite3::escapeString($s['name']) . "'," .
-		"'f'," .
+		"'fb'," .
 		"'local'," .
 		"\"" . SQLite3::escapeString($s['genre']) . "\"," .
 		"''," .
@@ -361,7 +365,7 @@ function rbWriteStation($s) {
 	phpSession('open');
 	$_SESSION[$s['url']] = array(
 		'name' => $s['name'],
-		'type' => 'f',
+		'type' => 'fb',
 		'logo' => 'local',
 		'bitrate' => $s['bitrate'],
 		'format' => $s['format'],
@@ -370,8 +374,15 @@ function rbWriteStation($s) {
 	);
 	phpSession('close');
 
-	$plsFile = MPD_MUSICROOT . 'RADIO/' . $s['name'] . '.pls';
-	$contents = "[playlist]\nFile1=" . $s['url'] . "\nTitle1=" . $s['name'] . "\nLength1=-1\nNumberOfEntries=1\nVersion=2\n";
+	rbWritePls($s['name'], $s['url']);
+}
+
+// Create the RADIO/<name>.pls that the native Radio view plays (data-path="RADIO/<name>.pls").
+// Factored out of rbWriteStation so promoting a played 'rb' station to favorite can also
+// create it (a 'rb' has a logo but no .pls, so without this the promoted favorite won't play).
+function rbWritePls($name, $url) {
+	$plsFile = MPD_MUSICROOT . 'RADIO/' . $name . '.pls';
+	$contents = "[playlist]\nFile1=" . $url . "\nTitle1=" . $name . "\nLength1=-1\nNumberOfEntries=1\nVersion=2\n";
 	file_put_contents($plsFile, $contents);
 	sysCmd('chmod 0777 "' . $plsFile . '"');
 	sysCmd('chown root:root "' . $plsFile . '"');
@@ -398,16 +409,71 @@ function rbDeleteStation($name) {
 }
 
 function rbMpdUpdateRadio() {
-	$sock = getMpdSock('command/radiobrowser.php');
+	$sock = getMpdSock('command/radio-browser.php');
 	sendMpdCmd($sock, 'update RADIO');
 	readMpdResp($sock);
 	closeMpdSock($sock);
 }
 
-// Same-origin logo proxy: fetch+cache ONE favicon on demand (rbCacheImage mechanism)
-// and stream it. Search returns raw favicon URLs; each tile's <img> points here, so
-// the browser loads logos in parallel and a slow/dead host only delays its own tile,
-// never the search response. Streams the cached PNG; 302s to the default cover on miss.
+// Normalised set of the stream URLs currently in the MPD play queue (for orphan pruning).
+// Uses playlistinfo and reads the canonical `file: <uri>` lines (moOde's own convention,
+// cf. getPlayqueue()/findInQueue) — the legacy `playlist` command's `pos:uri` format did
+// NOT match cfg_radio.station here, so prune wrongly deleted still-queued 'rb' rows.
+function rbQueuedUrls() {
+	$urls = array();
+	$sock = getMpdSock('command/radio-browser.php');
+	sendMpdCmd($sock, 'playlistinfo');
+	$resp = readMpdResp($sock);
+	closeMpdSock($sock);
+	if (is_string($resp)) {
+		foreach (explode("\n", $resp) as $line) {
+			if (strncmp($line, 'file: ', 6) === 0) {
+				$urls[rbNormalizeUrl(trim(substr($line, 6)))] = true;
+			}
+		}
+	}
+	return $urls;
+}
+
+// Prune transient (type='rb') radio-browser stations that are no longer in the play queue.
+// A 'rb' row exists ONLY so moOde's native now-playing/playqueue renderer can resolve a
+// played-but-unsaved stream's name/logo (via cfg_radio → session/RADIO.json); once the
+// stream leaves the queue the row is dead weight, so we delete it (row + local logo files
+// + session var). Keeps cfg_radio authoritative and self-cleaning without any temporary
+// JSON. $keepUrl protects the station currently being registered/played (it may not be in
+// the queue yet). Favorites (type='fb') and core/native stations are never touched.
+function rbPruneOrphanStations($keepUrl = '') {
+	$dbh = sqlConnect();
+	$rows = sqlQuery("SELECT station, name FROM cfg_radio WHERE type='rb'", $dbh);
+	if (!is_array($rows)) {
+		return;
+	}
+	$queued = rbQueuedUrls();
+	$keep = rbNormalizeUrl($keepUrl);
+	phpSession('open');
+	foreach ($rows as $r) {
+		$norm = rbNormalizeUrl($r['station']);
+		if ($norm === $keep || isset($queued[$norm])) {
+			continue;
+		}
+		unset($_SESSION[$r['station']]);
+		sqlQuery("DELETE FROM cfg_radio WHERE station='" . SQLite3::escapeString($r['station']) . "' AND type='rb'", $dbh);
+		$name = $r['name'];
+		sysCmd('rm -f "' . RADIO_LOGOS_ROOT . $name . '.jpg"');
+		sysCmd('rm -f "' . RADIO_LOGOS_ROOT . 'thumbs/' . $name . '.jpg"');
+		sysCmd('rm -f "' . RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg"');
+		// A demoted favorite (f -> u) keeps its RADIO/<name>.pls; remove it too so it doesn't
+		// orphan in the RADIO folder. A play-only 'rb' has none (rm -f is then a harmless no-op).
+		sysCmd('rm -f "' . MPD_MUSICROOT . 'RADIO/' . $name . '.pls"');
+	}
+	phpSession('close');
+}
+
+// Same-origin logo proxy: fetch+cache ONE favicon on demand and stream it. Search AND
+// Recent both return raw favicon URLs, so every tile's <img> points here — a single
+// render path. The browser loads logos in parallel and a slow/dead host only delays its
+// own tile. Content-Type is set from the bytes (getimagesize), not the cache filename,
+// so JPG/PNG are served correctly; 302s to the default cover on miss.
 function rbServeLogo($url) {
 	if (session_status() === PHP_SESSION_ACTIVE) {
 		session_write_close(); // release the session lock so parallel image requests don't serialise
@@ -422,9 +488,6 @@ function rbServeLogo($url) {
 		} else {
 			$data = rbHttpGet($url, 4);
 			if ($data !== false && strlen($data) > 100 && strlen($data) < 51200) {
-				if (!is_dir(RADIOBROWSER_IMAGE_CACHE)) {
-					@mkdir(RADIOBROWSER_IMAGE_CACHE, 0775, true);
-				}
 				if (@file_put_contents($path, $data)) {
 					$file = $path;
 				}
@@ -445,7 +508,7 @@ function rbServeLogo($url) {
 }
 
 // Register a radio-browser station locally WITHOUT playing it: ensure the 3 logo files
-// exist, persist it as cfg_radio type='u' (played/history — not shown in the Radio view)
+// exist, persist it as cfg_radio type='rb' (played/history — not shown in the Radio view)
 // if new, and set the session var so moOde's native now-playing/playqueue renderer
 // resolves name/format/logo. Shared by 'play' and by 'register' (the latter is fired
 // when a Radio Browser tile's context menu opens, so the native queue actions resolve a
@@ -466,7 +529,7 @@ function rbRegisterStation($station) {
 		$vals = 'NULL,' .
 			"'" . SQLite3::escapeString($url) . "'," .
 			"'" . SQLite3::escapeString($name) . "'," .
-			"'u','local'," .
+			"'rb','local'," .
 			"\"" . SQLite3::escapeString(trim($station['tags'] ?? '')) . "\"," .
 			"''," .
 			"'" . SQLite3::escapeString(trim($station['language'] ?? '')) . "'," .
@@ -482,7 +545,7 @@ function rbRegisterStation($station) {
 
 	phpSession('open');
 	$_SESSION[$url] = array(
-		'name' => $name, 'type' => 'u', 'logo' => 'local',
+		'name' => $name, 'type' => 'rb', 'logo' => 'local',
 		'bitrate' => $bitrate, 'format' => $format,
 		'home_page' => $homepage, 'monitor' => 'No'
 	);

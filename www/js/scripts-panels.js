@@ -423,8 +423,8 @@ jQuery(document).ready(function($) { 'use strict';
 	// EVENT HANDLERS
 	//
 
-    // Swap the native Radio grid and the radio-browser explorer (each wrapper has its own bar)
-    function setRadioExplore(active) {
+    // Swap Radio view native and Radio Browser (each wrapper has its own button bar)
+    function setRadioBrowser(active) {
         if (active) {
             $('.container-radio-native').addClass('hide');
             $('#container-radio-browser').removeClass('hide');
@@ -433,7 +433,7 @@ jQuery(document).ready(function($) { 'use strict';
         else {
             $('#container-radio-browser').addClass('hide');
             $('.container-radio-native').removeClass('hide');
-            // Refresh the now-visible native grid if a favorite changed while explore was on
+            // Refresh the now-visible native grid if a favorite changed while RB was on
             if (typeof RB === 'object' && RB.favoritesDirty && typeof renderRadioView === 'function') {
                 RB.favoritesDirty = false;
                 renderRadioView();
@@ -445,9 +445,9 @@ jQuery(document).ready(function($) { 'use strict';
 	$('.radio-view-btn').click(function(e){
         makeActive('.radio-view-btn','#radio-panel','radio');
 	});
-    // Radio Browser explore toggle (inside Radio view) — one copy per wrapper
-    $('.ra-explore-btn').click(function(e){
-        setRadioExplore($('#container-radio-browser').hasClass('hide'));
+    // Radio Browser toggle (inside Radio view) — one copy per wrapper
+    $('.rb-toggle-btn').click(function(e){
+        setRadioBrowser($('#container-radio-browser').hasClass('hide'));
     });
     // Playlist view
 	$('.playlist-view-btn').click(function(e){
@@ -951,9 +951,15 @@ jQuery(document).ready(function($) { 'use strict';
 	});
 	$('#db-refresh').click(function(e) {
         UI.dbPos[UI.dbPos[10]] = 0;
-		$.getJSON('command/music-library.php?cmd=lsinfo', {'path': UI.path}, function(data) {
-			renderFolderView(data, UI.path);
-        });
+        if (UI.dbCmd == 'get_pl_items_fv') {
+            $.getJSON('command/playlist.php?cmd=get_pl_items_fv', {'path': UI.path}, function(data) {
+                renderFolderView(data, UI.path);
+            });
+        } else {
+            $.getJSON('command/music-library.php?cmd=lsinfo', {'path': UI.path}, function(data) {
+                renderFolderView(data, UI.path);
+            });
+        }
 	});
 	$('#btn-db-import, #btn-pl-import').click(function(e) {
 		$('#db-import-file').val('');
