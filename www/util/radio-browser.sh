@@ -4,16 +4,16 @@
 # Copyright 2014 The moOde audio player project / Tim Curtis
 #
 # Radio Browser maintenance helper.
-# Usage: radio-browser.sh [--clear-recents|--fix-permissions|--flush-cache|--test-api]
+# Usage: radio-browser.sh [--clear-recents|--fix-permissions|--clear-caches|--check-servers]
 
-RBCACHE="/var/local/www/rbcache"
+RBCACHE="/var/local/www/rb-cache"
 RECENT="$RBCACHE/recently_played.json"
-IMGCACHE="/var/local/www/imagesw/radio-logos/cache"
+IMGCACHE="/var/local/www/imagesw/rb-logos"
 API="all.api.radio-browser.info"
 UA="moode-radio-browser/1.0"
 
 usage() {
-	echo "Usage: $(basename "$0") [--clear-recents|--fix-permissions|--flush-cache|--test-api]"
+	echo "Usage: $(basename "$0") [--clear-recents|--clear-caches|--check-servers|--fix-permissions]"
 	exit 1
 }
 
@@ -24,33 +24,48 @@ need_root() {
 case "$1" in
 	--clear-recents)
 		need_root "$1"
-		rm -f "$RECENT" && echo "Recently played cleared."
+		rm -f "$RECENT"
+		if [ $? -eq 0 ]; then
+			echo "Recently played has been cleared"
+		else
+			echo "Clear failed on Recents"
+		fi
+		;;
+	--clear-caches)
+		need_root "$1"
+		# API/response data + logo caches (keeps recently_played.json; use --clear-recents for that)
+		find "$RBCACHE" -maxdepth 1 -type f -name '*.json' ! -name 'recently_played.json' -delete 2>/dev/null
+		if [ $? -eq 0 ]; then
+			# Clear logo image cache
+			rm -f "$IMGCACHE"/* 2>/dev/null
+			if [ $? -eq 0 ]; then
+				echo "Caches have been cleared"
+			else
+				echo "Clear failed on Logo cache"
+			fi
+		else
+			echo "Clear failed on Data cache"
+		fi
+		;;
+	--check-servers)
+		start=$(date +%s%3N)
+		result=$(curl --stderr - -fsS --max-time 10 -A "$UA" "https://$API/json/servers")
+		rc=$?
+		end=$(date +%s%3N)
+		if [[ $rc -eq 0 ]]; then
+			count=$(echo $result | jq '.[].name' | sort -u | wc -l)
+			[[ $count -gt 0 ]] && s="" || s="s"
+			echo "$count server$s responded in $((end - start)) ms"
+		else
+			echo "No response was received"
+		fi
 		;;
 	--fix-permissions)
 		need_root "$1"
 		mkdir -p "$RBCACHE" "$IMGCACHE"
 		chown -R www-data:www-data "$RBCACHE" "$IMGCACHE"
 		chmod -R 0775 "$RBCACHE" "$IMGCACHE"
-		echo "Permissions fixed on $RBCACHE and $IMGCACHE."
-		;;
-	--flush-cache)
-		need_root "$1"
-		# API/response + logo caches (keeps recently_played.json; use --clear-recents for that)
-		find "$RBCACHE" -maxdepth 1 -type f -name '*.json' ! -name 'recently_played.json' -delete 2>/dev/null
-		rm -f "$IMGCACHE"/* 2>/dev/null
-		echo "Cache flushed (API responses + logos)."
-		;;
-	--test-api)
-		start=$(date +%s%3N)
-		count=$(curl -fsS --max-time 10 -A "$UA" "https://$API/json/servers" | grep -o '"name"' | wc -l)
-		rc=$?
-		end=$(date +%s%3N)
-		if [[ $rc -eq 0 && $count -gt 0 ]]; then
-			echo "API OK: $count servers via $API ($((end - start)) ms)."
-		else
-			echo "API FAILED via $API."
-			exit 1
-		fi
+		echo "Permissions fixed on data and logo cache"
 		;;
 	*)
 		usage

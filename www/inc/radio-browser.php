@@ -148,7 +148,7 @@ function rbFetchImageData($favicon) {
 		$data = rbHttpGet($favicon, 8);
 		return ($data !== false && strlen($data) > 100) ? $data : false;
 	}
-	// Local same-origin path (e.g. a cached favicon under imagesw/radio-logos/cache/)
+	// Local same-origin path (e.g. a cached favicon under imagesw/rb-logos/)
 	$local = '/var/local/www/' . ltrim($favicon, '/');
 	$real = realpath($local);
 	if ($real !== false && str_starts_with($real, '/var/local/www/imagesw/') && is_file($real)) {
@@ -487,7 +487,7 @@ function rbServeLogo($url) {
 			$file = $path;
 		} else {
 			$data = rbHttpGet($url, 4);
-			if ($data !== false && strlen($data) > 100 && strlen($data) < 51200) {
+			if ($data !== false && strlen($data) > RADIOBROWSER_IMAGE_MIN_SIZE && strlen($data) < RADIOBROWSER_IMAGE_MAX_SIZE) {
 				if (@file_put_contents($path, $data)) {
 					$file = $path;
 				}
