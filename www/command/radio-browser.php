@@ -1,10 +1,15 @@
 <?php
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright 2014 The moOde audio player project / Tim Curtis
+ * Copyright 2026 The moOde audio player project / Tim Curtis
+ * Copyright 2026 RadioBrowser extension   / @rubatron
+ *	https://github.com/rubatron/RadioBrowser/tree/main
+ * Copyright 2026 RadioBrowser integration / @Gjuju
+ *	https://github.com/moode-player/moode/commit/910bee751a1f65fa80b1cd44383bc9450cacba19
  *
- * radio-browser.info AJAX endpoint: dispatches ?cmd=… to the inc/radio-browser.php
- * function library. Derived from RubaTron's Radio Browser extension (GPL-3.0-or-later).
+ * Radio browser AJAX endpoint.
+ * Dispatches ?cmd=… to the appropriate function in inc/radio-browser.php function
+ * library. Derived from @rubatron's Radio Browser extension for moOde.
 */
 
 require_once __DIR__ . '/../inc/common.php';
@@ -71,7 +76,15 @@ switch ($cmd) {
 	case 'genres':
 		$data = rbCacheGet('genres', RADIOBROWSER_CACHE_TTL_STATIC);
 		if ($data === false) {
-			$data = rbApi('/json/tags', array('hidebroken' => 'true', 'order' => 'stationcount', 'reverse' => 'true', 'limit' => 200));
+			$result = sqlQuery("SELECT name, genre FROM cfg_rbgenres", sqlConnect());
+			usort($result, function ($a, $b) {
+    			return $a['name'] <=> $b['name'];
+			});
+			workerLog(print_r($result, true));
+			$data = array();
+			foreach ($result as $row) {
+				array_push($data, array('name' => $row['name'], 'genre' => $row['genre']));
+			}
 			if ($data !== false) {
 				rbCacheSet('genres', $data);
 			}

@@ -1,12 +1,15 @@
 <?php
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright 2014 The moOde audio player project / Tim Curtis
+ * Copyright 2026 The moOde audio player project / Tim Curtis
+ * Copyright 2026 RadioBrowser extension   / @rubatron
+ *	https://github.com/rubatron/RadioBrowser/tree/main
+ * Copyright 2026 RadioBrowser integration / @Gjuju
+ *	https://github.com/moode-player/moode/commit/910bee751a1f65fa80b1cd44383bc9450cacba19
  *
- * radio-browser.info integration — function library (radio-browser.info client,
- * cache, cfg_radio station read/write, logo proxy). Derived from RubaTron's Radio
- * Browser extension for moOde (GPL-3.0-or-later), re-implemented in moOde's native
- * conventions (cfg_radio, submitJob, mpd.php). Included by command/radio-browser.php.
+ * Radio browser function library.
+ * Derived from @rubatron's RadioBrowser extension for moOde and re-implemented
+ * using moOde's native PHP back-end conventions.
 */
 
 require_once __DIR__ . '/common.php';
@@ -183,27 +186,6 @@ function rbSaveLogo($name, $imageData) {
 	phpSession('close');
 	waitWorker('rbSaveLogo');
 	return true;
-
-	// NOTE: Code copied to case 'set_rblogo_image' in worker.php
-	/*$src = @imagecreatefromstring($imageData);
-	if (!$src) {
-		return false;
-	}
-	$w = imagesx($src);
-	$h = imagesy($src);
-
-	if (!is_dir(RADIO_LOGOS_ROOT)) {
-		@mkdir(RADIO_LOGOS_ROOT, 0755, true);
-	}
-	if (!is_dir(RADIO_LOGOS_ROOT . 'thumbs/')) {
-		@mkdir(RADIO_LOGOS_ROOT . 'thumbs/', 0755, true);
-	}
-
-	$ok1 = rbResizeAndSave($src, $w, $h, 400, RADIO_LOGOS_ROOT . $name . '.jpg');
-	$ok2 = rbResizeAndSave($src, $w, $h, 200, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '.jpg');
-	$ok3 = rbResizeAndSave($src, $w, $h, 80, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg');
-	imagedestroy($src);
-	return $ok1 && $ok2 && $ok3;*/
 }
 
 // Ensure the station has local logo files: download+convert the favicon, else copy the
@@ -213,6 +195,7 @@ function rbEnsureLogo($name, $favicon) {
 	if (file_exists(RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg')) {
 		return;
 	}
+
 	$saved = false;
 	if ($favicon !== '' && !str_contains($favicon, 'encrypted-tbn0.gstatic.com')) {
 		$data = rbFetchImageData($favicon);
@@ -220,10 +203,11 @@ function rbEnsureLogo($name, $favicon) {
 			$saved = rbSaveLogo($name, $data);
 		}
 	}
+
 	if (!$saved) {
-		@copy(DEFAULT_NOTFOUND_COVER, RADIO_LOGOS_ROOT . $name . '.jpg');
-		@copy(DEFAULT_NOTFOUND_COVER, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '.jpg');
-		@copy(DEFAULT_NOTFOUND_COVER, RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg');
+		sysCmd('cp "' . DEFAULT_NOTFOUND_COVER . '" "'  . RADIO_LOGOS_ROOT . $name . '.jpg"');
+		sysCmd('cp "' . DEFAULT_NOTFOUND_COVER . '" "'  . RADIO_LOGOS_ROOT . 'thumbs/' . $name . '.jpg"');
+		sysCmd('cp "' . DEFAULT_NOTFOUND_COVER . '" "'  . RADIO_LOGOS_ROOT . 'thumbs/' . $name . '_sm.jpg"');
 	}
 }
 
