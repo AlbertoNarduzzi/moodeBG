@@ -11,11 +11,30 @@
 
 ################################################################################
 #
-# 2026-MM-DD moOde 10.3.1 (Trixie)
+# 2026-MM-DD moOde 10.3.2 (Trixie)
 #
 ################################################################################
 
+Packages
+- UPD:
+
 Updates
+- UPD:
+
+Bug fixes
+- FIX:
+
+################################################################################
+#
+# 2026-07-22 moOde 10.3.1 (Trixie)
+#
+################################################################################
+
+Packages
+- UPD: peppy-meter 2026.7.20-1moode1
+
+Updates
+- UPD: Increase hit area of the ... button for Queue items (PR #771 @Gjuju)
 - UPD: Provide dB values for MPD software volume (PR #770 @Gjuju)
 
 Radio Browser
@@ -25,10 +44,16 @@ Radio Browser
 - FIX: Highlight is missing when tile is clicked
 - FIX: Duplicate station URL's can be added
 - FIX: Countries sorted by country code instead of name
+- FIX: Remove duplicate genre "Jazz - Bebop" entry
+- FIX: Radio Manager hide/unhide actions set wrong station type for RB stations
 
 Bug fixes
-- FIX: dB volume/attenuation when Peppy is in the audio chain (PR #769 @Gjuju)
+- FIX: Premature auto-switch from Peppy to WebUI on track change (PR #777 @Gjuju)
+- FIX: Fix no Bluetooth audio when a GEQ/PEQ/Crossfeed active (PR #774 @Gjuju)
+- FIX: Hardware volume not being tracked when Peppy is on (PR #773 @Gjuju)
+- FIX: Volume/attenuation when Peppy is on (PR #769 @Gjuju)
 - FIX: Typo in Library Config help for the Analyze button
+- FIX: Index search broken in Radio view when group by "Favorites first"
 
 ################################################################################
 #

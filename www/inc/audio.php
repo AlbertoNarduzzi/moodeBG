@@ -7,6 +7,7 @@
 require_once __DIR__ . '/alsa.php';
 require_once __DIR__ . '/common.php';
 require_once __DIR__ . '/mpd.php';
+require_once __DIR__ . '/peripheral.php';
 require_once __DIR__ . '/renderer.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/sql.php';
@@ -273,6 +274,15 @@ function updDspAndBtInConfs($cardNum, $outputMode) {
 		} else {
 			$alsaDevice = 'peppy';
 		}
+	// LADSPA heads (alsaequal/crossfeed/eqfa12p) can't be opened via plug:_audioout; open directly
+	} else if ($_SESSION['alsaequal'] != 'Off') {
+		$alsaDevice = 'alsaequal';
+	} else if ($_SESSION['camilladsp'] != 'off') {
+		$alsaDevice = 'plug:_audioout';
+	} else if ($_SESSION['crossfeed'] != 'Off') {
+		$alsaDevice = 'crossfeed';
+	} else if ($_SESSION['eqfa12p'] != 'Off') {
+		$alsaDevice = 'eqfa12p';
 	} else {
 		// A2DP sink: convert the fixed-format decoded PCM at the top of the chain
 		$alsaDevice = 'plug:_audioout';
@@ -302,6 +312,16 @@ function updPeppyConfs($cardNum, $outputMode) {
 	$peppyConfFile = file_exists(ALSA_PLUGIN_PATH . '/peppy.conf.hide') ? '/peppy.conf.hide' : '/peppy.conf';
 	sysCmd("sed -i 's/^name.*/name \"" . $alsaMixer . "\"/' " . ALSA_PLUGIN_PATH . $peppyConfFile);
 	sysCmd("sed -i 's/^card.*/card " . $cardNum . "/' " . ALSA_PLUGIN_PATH . $peppyConfFile);
+	// Follow the ALSA chain, not the display: touchmon flips peppy_display straight in the
+	// database whenever it swaps the screen between the WebUI and Peppy, so peppy_display
+	// says what is on screen right now, not whether peppyalsa is in the chain. Bounce the
+	// monitor rather than leave it: it watches a fixed card, and the output device (hw:N),
+	// output mode or volume type may just have changed.
+	if ($_SESSION['peppy_display'] == '1' || $_SESSION['enable_peppyalsa'] == '1') {
+		startPeppyGainMon();
+	} else {
+		stopPeppyGainMon();
+	}
 }
 
 // Read output device cache

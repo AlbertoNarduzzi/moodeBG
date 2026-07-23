@@ -1434,6 +1434,12 @@ if ($_SESSION['local_display'] == '1' || $_SESSION['peppy_display'] == '1') {
 	}
 	startLocalDisplay();
 }
+// Not gated on peppy_display: that only says which screen touchmon is showing right now
+// (it swaps to the WebUI whenever playback stops), while the meter can come back at the
+// next track. Follow the ALSA chain instead, like updAudioOutAndBtOutConfs() does.
+if ($_SESSION['peppy_display'] == '1' || $_SESSION['enable_peppyalsa'] == '1') {
+	startPeppyGainMon();
+}
 
 // WebUI display
 workerLog('worker: WebUI display:    ' . ($_SESSION['local_display'] == '1' ? 'on' : 'off'));
@@ -1954,6 +1960,10 @@ while (true) {
 		//debugLog('** chkPeppyScnBlank');
 		chkPeppyScnBlank();
 	}
+	if ($_SESSION['peppy_display'] == '1' || $_SESSION['enable_peppyalsa'] == '1') {
+		//debugLog('** chkPeppyGainMon');
+		chkPeppyGainMon();
+	}
 	// CoverView (as screen saver)
 	if ($_SESSION['scnsaver_timeout'] != 'Never') {
 		//debugLog('** chkScnSaver');
@@ -2283,6 +2293,16 @@ function chkAttachedDisplayOnOff() {
 	if ($_SESSION['local_display_onoff'] != $currentOnOff) {
 		$_SESSION['local_display_onoff'] = $currentOnOff;
 		sendFECmd('local_display_onoff,' . $currentOnOff);
+	}
+}
+// Tracks Hardware volume and updates peppy
+function chkPeppyGainMon() {
+	// The meter gain is only as good as the daemon that publishes it: if it dies the
+	// needles keep displaying the last dB and silently stop following the volume.
+	// The [.] keeps the pattern from matching the shell that runs pgrep itself.
+	if (sysCmd('pgrep -c -f "peppy-gain[.]php"')[0] == '0') {
+		workerLog('worker: Peppy gain monitor: not running, restarted');
+		startPeppyGainMon();
 	}
 }
 // Peppy screen blank
@@ -3147,6 +3167,9 @@ function runQueuedJob() {
 					updAudioOutAndBtOutConfs($_SESSION['cardnum'], $_SESSION['alsa_output_mode']);
 					break;
 			}
+
+			// Regenerate the Bluetooth A2DP sink device (AUDIODEV) for the new DSP head
+			updDspAndBtInConfs($_SESSION['cardnum'], $_SESSION['alsa_output_mode']);
 
 			// Restart MPD
 			// NOTE: Don't restart if already done in the camillaDSP section
