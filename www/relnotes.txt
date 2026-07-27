@@ -16,13 +16,18 @@
 ################################################################################
 
 Packages
-- UPD:
+- NEW: alsa-lib: 1.2.14-1+rpt1moode1
+- UPD: peppy-alsa: 2026.07.26-1moode1
+- UPD: mpd: 0.24.13
 
 Updates
-- UPD:
+- UPD: Support native DSD levels in Peppy (pkgbuild PR #24/25 by @Gjuju)
+- UPD: Support DoP levels in Peppy (pkgbuild PR #23 by @Gjuju)
+- UPD: Get Bluetooth decoded-to using bluealsa-cli instead of hard coding it
 
 Bug fixes
-- FIX:
+- FIX: Bluetooth PIN pairing: use Confirm Code pairing (PR #784 by @Gjuju)
+- FIX: MPD socket error when native DSD and Peppy (pkgbuild PR #24 by @Gjuju)
 
 ################################################################################
 #
