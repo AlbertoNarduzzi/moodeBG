@@ -15,9 +15,14 @@
 #
 ################################################################################
 
+Updates:
+- UPD: Radio Browser improve notification messages, reduce messages
+
 Bug fixes
 - FIX: Duplicate entries in Radio Cover+ cache table
 - FIX: Bluetooth pairing modal not displayed when on Config screens
+- FIX: Brightness adjustment not working for Pi Touch 2 DSI screen
+- FIX: Radio Browser recents not showing registered stations
 
 ################################################################################
 #
