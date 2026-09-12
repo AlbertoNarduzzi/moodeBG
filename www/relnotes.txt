@@ -11,13 +11,29 @@
 
 ################################################################################
 #
-# 2026-MM-DD moOde 10.3.4 (Trixie)
+# 2026-MM-DD moOde 10.3.5 (Trixie)
+#
+################################################################################
+
+Updates
+- UPD: Set Qobuz 'cache_to_disk' option based on Pi physical memory
+- UPD: Improve Radio Cover+: reduce logging, prevent blank url's in rcu cache
+
+Bug fixes
+- FIX: Backup from r1034 won't restore completely
+
+################################################################################
+#
+# 2026-09-08 moOde 10.3.4 (Trixie)
 #
 ################################################################################
 
 Packages
-- UPD: shairport-sync: 5.2.3-1moode1
-- UPD: mpd: 0.24.15-1moode1
+- UPD: Shairport-sync: 5.5.1-1moode1
+- UPD: MPD: 0.24.15-1moode1
+
+Updates
+- UPD: Refactor obsolete Deezer Connect framework to support Qobuz Connect
 
 Bug fixes
 - FIX: Renderer wide layout on mobile
