@@ -15,12 +15,30 @@
 #
 ################################################################################
 
+Packages
+- UPD: Linux-image: 1:6.18.50-1+rpt1
+- UPD: Pibuz: TBD (user install)
+
 Updates
-- UPD: Set Qobuz 'cache_to_disk' option based on Pi physical memory
-- UPD: Improve Radio Cover+: reduce logging, prevent blank url's in rcu cache
+- UPD: Improve Radio Cover+: URL cache, logging, deadlines for parallel search
+- UPD: Eliminate unnecessary warnings during startup from getMpdSock()
+- UPD: Remove deprecated MPD option "thesycon_dsd_workaround"
+- UPD: Use configured keyboard layout for on-screen keyboard (PR #791 by @Gjuju)
+- UPD: Keep volknob from jumping between min/max mid-drag (PR #792 by @Gjuju)
+- UPD: V5 Moode meters: add Champagne (Accuphase) and Pure-white (Technics)
 
 Bug fixes
 - FIX: Backup from r1034 won't restore completely
+- FIX: In-place update script fails on <= moode 10.3.1 due to multiple issues
+- FIX: Radio Cover+ query format for Deezer
+- FIX: Radio Cover+ execution not serialized
+- FIX: ALSA card number or device mismatch after Restore (rare)
+- FIX: Missing conditional to start/stop triggerhappy during startup
+- FIX: Var name typo in watchdog.sh (PR #802 by @TheOldPresbyope)
+- FIX: Rotary encoder decode to prevent bounce back (PR #801) by @nitrousptm)
+- FIX: Autoscroll when nav from playback to radio view PR #789 by @adriantaga)
+- FIX: Renderer screen empty when qbz session starts paused (PR #794 by @Gjuju)
+- FIX: Settings management and var name typo for qbz (PR #795 by @Gjuju)
 
 ################################################################################
 #
