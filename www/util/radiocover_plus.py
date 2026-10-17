@@ -115,7 +115,7 @@ def read_global():
 
 	values = {}
 	if not os.path.isfile(CONFIG_FILE):
-		logging(f"[read_global] Config file missing: {CONFIG_FILE}")
+		logging.error(f"[read_global] Config file missing: {CONFIG_FILE}")
 		return
 
 	try:
@@ -125,18 +125,18 @@ def read_global():
 				if not line or line.startswith("#"):
 					continue
 				if "=" not in line:
-					logging(f"[read_global] Invalid line {lineno}: {line}")
+					logging.warning(f"[read_global] Invalid line {lineno}: {line}")
 					continue
 				key, value = line.split("=", 1)
 				values[key.strip()] = value.strip() or None
 	except Exception as e:
-		logging(f"[read_global] Error reading config: {e}")
+		logging.error(f"[read_global] Error reading config: {e}")
 		return
 
 	def load_token(name):
 		val = values.get(name)
 		if not val:
-			logging(f"[read_global] Missing or empty token: {name}")
+			logging.error(f"[read_global] Missing or empty token: {name}")
 		return val
 
 	def load_float(key, fallback):
@@ -147,7 +147,7 @@ def read_global():
 				if val < 0: raise ValueError
 				return val
 		except ValueError:
-			logging(f"[read_global] Invalid {key}, fallback={fallback}")
+			logging.error(f"[read_global] Invalid {key}, fallback={fallback}")
 		return fallback
 
 	def load_int(key, fallback):
@@ -158,7 +158,7 @@ def read_global():
 				if val < 0: raise ValueError
 				return val
 		except ValueError:
-			logging(f"[read_global] Invalid {key}, fallback={fallback}")
+			logging.error(f"[read_global] Invalid {key}, fallback={fallback}")
 		return fallback
 
 	# Search parameters
@@ -444,6 +444,8 @@ def get_image_resolution(url, mode="regex"):
 		try:
 			m = re.search(r'(\d+)x(\d+)', url)
 			if m: return int(m.group(1)), int(m.group(2))
+			m = re.search(r'coverartarchive\.org/.+-(250|500|1200)\.jpg$', url)
+			if m: return int(m.group(1)), int(m.group(1))
 		except Exception:
 			pass
 		return 0, 0
@@ -541,9 +543,9 @@ def search_musicbrainz(artist, title, album=None):
 						if cr.ok:
 							for img in cr.json().get("images", []):
 								if img.get("front"):
-									img_url = (img.get("image")
+									img_url = (img.get("thumbnails", {}).get("1200")
 											   or img.get("thumbnails", {}).get("large")
-											   or img.get("thumbnails", {}).get("small"))
+											   or img.get("image"))
 									if img_url:
 										return img_url, rel_title, album_type
 					except Exception as e:
@@ -781,7 +783,7 @@ def search_cover_parallel(artist, title, attempt=1):
 				chosen = cover_data[0][0]
 				chosen_provider = cover_data[0][2]
 			else:
-				logging.error(f"[search_cover_parallel] Cover discarded {chosen_provider}, not within min/max size limit")
+				logging.error(f"[search_cover_parallel] Cover discarded {cover_data[0][2]}, not within min/max size limit")
 				chosen = None
 				chosen_provider = None
 		return chosen, float(best_score), best_album, chosen_provider
