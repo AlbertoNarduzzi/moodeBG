@@ -11,6 +11,34 @@
 
 ################################################################################
 #
+# 2026-MM-DD moOde 10.3.8 (Trixie)
+#
+################################################################################
+
+New features
+- NEW: Spotify Soloist renderer: Lossless to 24/44.1 (PR837 and related @Gjuju)
+
+Packages
+- UPD: Linux-image: 1:6.18.60-1+rpt1
+- UPD: peppy-meter: 2026.11.04-1moode1
+
+Updates
+- UPD: Add performance optimizations (PR849 - PR859 @Gjuju)
+- UPD: Add stop command to REST API (PR843 @Gjuju)
+- UPD: Add volume curve option to Peppymeter (PR841 @Gjuju)
+- UPD: Add auto-configure Output device on USB audio hot-plug (PR838 @Gjuju)
+- UPD: Add REST API play and pause commands (PR842 @Gjuju)
+- UPD: Add genre and performer tags to metadata file (currentsong.txt)
+- UPD: Improve REST API: Single endpoint, updated doc (PR834, PR22 @Gjuju)
+- UPD: Improve Dashboard: Disable player tile if offline
+
+Bug fixes
+- FIX: Renderer overlays appear on Configure pages
+- FIX: System info reports error message for Qobuz Connect if not installed
+- FIX: Sudoers dropfile creation during startup (PR848 @Gjuju)
+
+################################################################################
+#
 # 2026-10-31 moOde 10.3.7 (Trixie)
 #
 ################################################################################
@@ -21,8 +49,8 @@ Packages
 - UPD: Pibuz: 2.7.2-1moode1 (User build/install)
 - UPD: Shairport-sync: 5.6.2-1moode1 (User build/install)
 - UPD: Shairport-sync-metadata-reader: 2.0.1~git20261003.99a5935-1moode1
-- UPD: NGINX: 1.26.3-3+deb13u10
-- UPD: PHP: 8.4.27-1~deb13u1
+- UPD: NGINX: 1.26.3-3+deb13u10 (new image only)
+- UPD: PHP: 8.4.27-1~deb13u1 (new image only)
 
 New features
 - NEW: Renderer plugin .debs included in Backup/Restore
