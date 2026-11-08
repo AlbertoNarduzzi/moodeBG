@@ -9,7 +9,9 @@ set_include_path('/var/www/inc');
 error_reporting(E_ERROR);
 
 // Time zone
-$timeZone = sysCmd("timedatectl | awk -F' ' '/Time zone/{print $3}'")[0];
+$timeZone = (string)readlink('/etc/localtime');
+$timeZone = strpos($timeZone, 'zoneinfo/') !== false ? substr($timeZone, strpos($timeZone, 'zoneinfo/') + 9) :
+	sysCmd("timedatectl | awk -F' ' '/Time zone/{print $3}'")[0];
 date_default_timezone_set($timeZone);
 
 // Constants
@@ -323,14 +325,15 @@ function getThisIpAddr() {
 
 // Get release
 function getMoodeRel($options = '') {
+	// Same parse as moodeutl --mooderel
+	$file = file_get_contents('/var/www/footer.min.php');
+	$release = str_replace("\n", '', substr($file, strpos($file, 'Release: ') + 9, 17));
 	if ($options === 'verbose') {
 		// Verbose: 'major.minor.patch yyyy-mm-dd'
-		$result = sysCmd("moodeutl --mooderel | tr -d '\n'");
-		return $result[0];
+		return $release;
 	} else {
 		// Compact: 'rNNN'
-		$result = sysCmd("moodeutl --mooderel | tr -d '\n'");
-		$str = 'r' . str_replace('.', '', explode(' ', $result[0])[0]);
+		$str = 'r' . str_replace('.', '', explode(' ', $release)[0]);
 		return $str;
 	}
 }
@@ -352,7 +355,7 @@ function parseDelimFile($data, $delim) {
 // Determine if a renderer is active
 function chkRendererActive() {
 	$result = sqlQuery("SELECT value from cfg_system WHERE param in (
-		'btactive', 'aplactive', 'spotactive', 'qbzactive', 'slactive', 'paactive',
+		'btactive', 'aplactive', 'spotactive', 'qbzactive', 'solactive', 'slactive', 'paactive',
 		'rbactive', 'inpactive')", sqlConnect());
 
 	$active = false;
@@ -363,6 +366,26 @@ function chkRendererActive() {
 	}
 
 	return $active;
+}
+
+// Return the active renderer flag, empty string if none
+// If several flags are set the first one in this order wins, slactive stays set while no LMS answers
+function getActiveRenderer() {
+	$result = sqlQuery("SELECT param, value from cfg_system WHERE param in (
+		'btactive', 'aplactive', 'spotactive', 'qbzactive', 'solactive', 'slactive', 'paactive',
+		'rbactive', 'inpactive')", sqlConnect());
+
+	$flags = array();
+	foreach ($result as $row) {
+		$flags[$row['param']] = $row['value'];
+	}
+	foreach (array('inpactive', 'btactive', 'aplactive', 'spotactive', 'solactive', 'qbzactive', 'rbactive', 'paactive', 'slactive') as $flag) {
+		if (isset($flags[$flag]) && $flags[$flag] == '1') {
+			return $flag;
+		}
+	}
+
+	return '';
 }
 
 // Get Pi revision code information
@@ -451,6 +474,7 @@ function storeBackLink($section, $tpl) {
 		'eqp-config.html'	=> '/snd-config.php',
 		'gpio-config.html'	=> '/per-config.php',
 		'spo-config.html' 	=> '/ren-config.php',
+		'sol-config.html' 	=> '/ren-config.php',
 		'sqe-config.html'	=> '/ren-config.php',
 		'lib-nas-config.html' => '/lib-config.php',
 		'lib-nvme-config.html' => '/lib-config.php',

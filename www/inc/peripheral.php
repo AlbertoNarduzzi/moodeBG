@@ -62,6 +62,10 @@ function restartMpdAndRenderers($resetAlsaCtl) {
 		stopQobuz();
 		startQobuz();
 	}
+	if ($_SESSION['soloistsvc'] == 1) {
+		stopSoloist();
+		startSoloist();
+	}
 }
 function allowPeppyInAlsaChain() {
 	// NOTE: MPD cant play ALSA chain: _audioout -> [alsaequal or eqfa12p] -> peppy -> btstream
@@ -112,6 +116,10 @@ function putPeppyConfig($configArray) {
 				break;
 			case 'meter_normalization':
 				$param = 'volume.max.in.pipe';
+				sysCmdSed('s/^' . $param . '.*/' . $param . ' = ' . number_format($value, 1) . '/', PEPPY_METER_ETC_DIR . '/config.txt');
+				break;
+			case 'meter_curve':
+				$param = 'volume.curve';
 				sysCmdSed('s/^' . $param . '.*/' . $param . ' = ' . number_format($value, 1) . '/', PEPPY_METER_ETC_DIR . '/config.txt');
 				break;
 			case 'frame_rate':
