@@ -1552,7 +1552,7 @@ workerLog('worker: Encoder params:   ' . $_SESSION['rotenc_params']);
 workerLog('worker: GPIO buttons:     ' . ($_SESSION['gpio_svc'] == '1' ? 'on' : 'off'));
 // Start LCD updater engine
 if (!isset($_SESSION['lcdup'])) {
-	$_SESSION['lcdup'] == '0';
+	$_SESSION['lcdup'] = '0';
 }
 if ($_SESSION['lcdup'] == '1') {
 	startLcdUpdater();
@@ -1572,6 +1572,9 @@ workerLog('worker: --');
 workerLog('worker: -- Miscellaneous');
 workerLog('worker: --');
 //----------------------------------------------------------------------------//
+
+// Renderer volume watch
+stopRendererWatch();
 
 // Software update auto-check
 if (!isset($_SESSION['updater_auto_check'])) {
@@ -2002,6 +2005,9 @@ while (true) {
 		//debugLog('** chkInpActive');
 		chkInpActive();
 	}
+	// Renderer volume watch
+	//debugLog('** chkRendererWatch');
+	chkRendererWatch();
 
 	// Displays
 	if ($_SESSION['local_display'] == '1' || $_SESSION['peppy_display'] == '1') {
@@ -2091,8 +2097,7 @@ function chkBtActive() {
 		}
 	}
 
-	$result = exec('pgrep -l bluealsa-aplay');
-	if (strpos($result, 'bluealsa-aplay') !== false) {
+	if (isProcRunning('bluealsa-aplay')) {
 		// Do this section only once
 		if ($_SESSION['btactive'] == '0') {
 			phpSession('write', 'btactive', '1');
@@ -2375,8 +2380,7 @@ function chkAttachedDisplayOnOff() {
 function chkPeppyGainMon() {
 	// The meter gain is only as good as the daemon that publishes it: if it dies the
 	// needles keep displaying the last dB and silently stop following the volume.
-	// The [.] keeps the pattern from matching the shell that runs pgrep itself.
-	if (exec('pgrep -c -f "peppy-gain[.]php"') == '0') {
+	if (!isProcRunning('peppy-gain.php')) {
 		workerLog('worker: Peppy gain monitor: not running, restarted');
 		startPeppyGainMon();
 	}

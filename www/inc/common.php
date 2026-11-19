@@ -266,6 +266,45 @@ function chkXSS($file, $element, $value) {
 	}
 }
 
+// Check CSRF Token (Cross-Site Request Forgery)
+function chkCsrfToken($token) {
+	$valid = true;
+	$msg = '';
+	if (empty($token)) {
+		$valid = false;
+		$msg = 'Missing post CSRF token, request denied';
+	} else if (empty($_SESSION['csrf_token'])) {
+		$valid = false;
+		$msg = 'Missing session CSRF token, request denied';
+	} else if (!hash_equals($_SESSION['csrf_token'], $token)) {
+		$valid = false;
+		$msg = 'CSRF token hash check failed, request denied';
+	}
+
+	if ($valid === false) {
+		workerLog('SECCHK: ' . $msg);
+		// Redirect to '400 Bad request' page and then exit
+		http_response_code(400);
+		header('Location: /response400.html');
+		exit(1);
+	}
+	// Optional: Regenerate token after successful submission for single-use protection
+	//unset($_SESSION['csrf_token']);
+}
+
+// Secret form fields (passwords, API keys): the saved value is never sent to the page
+// Return the value to save, '' when Clear is clicked, null to keep the saved value
+function secretFieldPost($key, $value) {
+	if (isset($_POST['clear'][$key])) {
+		return '';
+	}
+	return $value == '' ? null : $value;
+}
+// Return the field placeholder and the Clear button class
+function secretFieldView($isSet, $emptyPlaceholder = '') {
+	return $isSet ? array('••••••••••••••••', '') : array($emptyPlaceholder, 'hide');
+}
+
 //----------------------------------------------------------------------------//
 // SYSTEM
 //----------------------------------------------------------------------------//
@@ -285,6 +324,15 @@ function sysCmdStr($cmd) {
 // can't end the quoting and have the rest of the string run as commands.
 function sysCmdSed($expr, $file) {
 	return sysCmd('sed -i ' . escapeshellarg($expr) . ' ' . escapeshellarg($file));
+}
+// Same match as 'pgrep <name>' (process name contains $name) without starting a process
+function isProcRunning($name) {
+	foreach (glob('/proc/[0-9]*/comm') as $file) {
+		if (str_contains((string)@file_get_contents($file), $name)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 // Get major version (series) SS in 'rSSNN'

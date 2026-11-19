@@ -16,14 +16,8 @@ SQLDB=/var/local/www/db/moode-sqlite3.db
 # WebUI will hang if no more workers can be spawned.
 FPM_MAX_LIMIT=60
 FPM_MIN_LIMIT=30
-
-FPM_CNT=$(pgrep -c -f "php-fpm: pool www")
-MPD_RUNNING=$(pgrep -c -x "mpd")
-AIRPLAY_RUNNING=$(pgrep -c -f "LC_ALL=C /usr/bin/shairport-sync")
-SPOTIFY_RUNNING=$(pgrep -c -x "librespot")
-QOBUZ_RUNNING=$(pgrep -c -x "pibuz")
-SOLOIST_RUNNING=$(pgrep -c -x "soloist")
-TRX_RX_RUNNING=$(pgrep -c -x "trx-rx")
+FPM_RETRES=0
+FPM_RETRY_MAX=5
 
 message_log () {
 	TIME=$(date +'%Y%m%d %H%M%S')
@@ -64,6 +58,23 @@ wake_display () {
 	fi
 }
 
+# Same counts as pgrep -x <name> / pgrep -f <pattern>, from one process list
+count_procs () {
+	FPM_CNT=0; MPD_RUNNING=0; AIRPLAY_RUNNING=0; SPOTIFY_RUNNING=0; QOBUZ_RUNNING=0; SOLOIST_RUNNING=0; TRX_RX_RUNNING=0
+	while read -r COMM ARGS; do
+		case $COMM in
+			mpd) ((MPD_RUNNING++)) ;;
+			librespot) ((SPOTIFY_RUNNING++)) ;;
+			pibuz) ((QOBUZ_RUNNING++)) ;;
+			soloist) ((SOLOIST_RUNNING++)) ;;
+			trx-rx) ((TRX_RX_RUNNING++)) ;;
+		esac
+		[[ $ARGS == *"php-fpm: pool www"* ]] && ((FPM_CNT++))
+		[[ $ARGS == *"LC_ALL=C /usr/bin/shairport-sync"* ]] && ((AIRPLAY_RUNNING++))
+	done < <(ps -e -o comm=,args=)
+}
+
+count_procs
 declare -A CFG
 while true; do
 	# Settings used in this loop, one query
@@ -71,14 +82,16 @@ while true; do
 	while IFS='|' read -r PARAM VALUE; do CFG[$PARAM]=$VALUE; done < <(sqlite3 $SQLDB "SELECT param, value FROM cfg_system WHERE param IN ('airplaysvc', 'spotifysvc', 'qobuzsvc', 'soloistsvc', 'multiroom_rx', 'multiroom_tx', 'local_display', 'local_display_url', 'peppy_display', 'wake_display', 'peppy_scn_blank_active', 'hdmi_cec')")
 
 	# PHP-FPM
-	if (( FPM_CNT > FPM_MIN_LIMIT )); then
-		#message_log "Reducing PHP-FPM worker pool to free up resources"
+	if (( FPM_CNT > FPM_MIN_LIMIT && FPM_RETRIES < FPM_RETRY_MAX)); then
+		message_log "Reducing PHP-FPM worker pool to free up resources"
 		/var/www/util/send-fecmd.php reduce_fpm_pool
+		((FPM_RETRIES++))
 	fi
 
-	if (( FPM_CNT > FPM_MAX_LIMIT )); then
+	if (( FPM_CNT > FPM_MAX_LIMIT || FPM_RETRIES >= FPM_RETRY_MAX )); then
 		message_log "PHP-FPM was reloaded to free up worker pool resources"
 		systemctl reload php$PHP_VER-fpm
+		FPM_RETRIES=0
 	fi
 
 	# MPD
@@ -224,12 +237,6 @@ while true; do
 	fi
 
 	sleep $WATCHDOG_SLEEP
-	FPM_CNT=$(pgrep -c -f "php-fpm: pool www")
-	MPD_RUNNING=$(pgrep -c -x "mpd")
-	AIRPLAY_RUNNING=$(pgrep -c -f "LC_ALL=C /usr/bin/shairport-sync")
-	SPOTIFY_RUNNING=$(pgrep -c -x "librespot")
-	QOBUZ_RUNNING=$(pgrep -c -x "pibuz")
-	SOLOIST_RUNNING=$(pgrep -c -x "soloist")
-	TRX_RX_RUNNING=$(pgrep -c -x "trx-rx")
+	count_procs
 
 done > /dev/null 2>&1 &
