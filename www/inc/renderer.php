@@ -285,7 +285,7 @@ function cfgQobuz() {
 	$volMode = $_SESSION['mpdmixer'] == 'none' ? 'locked' : 'software';
 
 	// QConnect
-	sysCmd('pibuz qconnect enable');
+	sysCmd('pibuz settings set qconnect.startup_mode on');
 	sysCmd('pibuz settings set qconnect.device_name "' . $_SESSION['qobuzname'] . '"');
 	sysCmd('pibuz settings set qconnect.pairing on');
 	sysCmd('pibuz settings set qconnect.volume_mode ' . $volMode);
@@ -616,6 +616,11 @@ function getSoloistApiKey() {
 	$apiKey = file_exists(SOLOIST_KEY_FILE) ? trim(file_get_contents(SOLOIST_KEY_FILE)) : '';
 	return isValidSoloistApiKey($apiKey) ? $apiKey : false;
 }
+function clearSoloistApiKey() {
+	if (file_exists(SOLOIST_KEY_FILE)) {
+		unlink(SOLOIST_KEY_FILE);
+	}
+}
 function setSoloistApiKey($apiKey) {
 	if (!isValidSoloistApiKey($apiKey)) {
 		return false;
@@ -724,4 +729,24 @@ function stopAllRenderers() {
 			workerLog('stopAllRenderers(): ' . $svc . ' stopped');
 		}
 	}
+}
+
+// Volume state of the active renderer, kept by renderer_ctl.py watch for the REST API
+function chkRendererWatch() {
+	$renderers = array('btactive' => 'bluetooth', 'aplactive' => 'airplay', 'qbzactive' => 'qobuz',
+		'slactive' => 'squeezelite', 'solactive' => 'soloist');
+	$flag = getActiveRenderer();
+	$renderer = isset($renderers[$flag]) ? $renderers[$flag] : '';
+	if ($renderer != $GLOBALS['renderer_watch']) {
+		stopRendererWatch();
+		if ($renderer != '') {
+			sysCmd('/var/www/util/renderer_ctl.py ' . $renderer . ' watch > /dev/null 2>&1 &');
+		}
+		$GLOBALS['renderer_watch'] = $renderer;
+	}
+}
+function stopRendererWatch() {
+	sysCmd("pkill -f '[r]enderer_ctl.py .* watch'");
+	sysCmd('truncate ' . RENDVOL_CACHE_FILE . ' --size 0');
+	$GLOBALS['renderer_watch'] = '';
 }

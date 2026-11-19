@@ -12,6 +12,9 @@
 	session_id($result[0]['value']);
 	$returnVal = session_start();
 	//debugLog('header.php: session_start() = ' . (($returnVal) ? 'true' : 'false') . ', sessionid = ' . $result[0]['value']);
+	if (empty($_SESSION['csrf_token'])) {
+		$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+	}
 ?>
 <!--endRemoveIf(GENINDEXDEV)-->
 <!DOCTYPE html>
@@ -50,16 +53,6 @@
 	<!-- Common JS -->
 	<!-- build:js js/lib.min.js defer -->
 	<script src="js/jquery-1.8.2.js" /></script>
-	<script src="js/jquery-ui/jquery-ui.js" ></script>
-	<script src="js/jquery-ui/jquery.ui.core.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.widget.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.mouse.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.position.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.datepicker.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.slider.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.tooltip.js" defer></script>
-	<script src="js/jquery-ui/jquery.ui.effect.js" defer></script>
-
 	<script src="js/bootstrap.js" defer></script>
 	<script src="js/bootstrap-select.js" defer></script>
 	<script src="js/jquery.pnotify.js" defer></script>
@@ -97,8 +90,6 @@
 		<!-- build:js js/config.min.js defer -->
 		<!-- CONFIGBLOCKSECTION_BEGIN -->
 		<script src="js/custom_radio.js" defer></script>
-		<script src="js/jquery.tagsinput.js" defer></script>
-		<script src="js/jquery.placeholder.js" defer></script>
 		<script src="js/i18n/_messages.en.js" defer></script>
 		<script src="js/application.js" defer></script>
 		<script src="js/scripts-configs.js" defer></script>

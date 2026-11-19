@@ -12,7 +12,7 @@
 		After saving or removing a remote NAS source, return to Playback or Library and select "Update library" from the Menu.
 	</p>
 
-	<form class="form-horizontal" action="lib-config.php" method="post">
+	<form id="config-form" class="form-horizontal" action="lib-config.php" method="post">
 		<legend>Remote host
 			<button class="legend-config btn btn-medium btn-primary btn-submit" type="submit" name="save_nas_source" value="1">Save</button>
 			<a href="#remove-nas-source" data-toggle="modal" class="$_hide_remove_nas_source"><button class="legend-config btn btn-medium btn-primary">Remove</button></a>
@@ -34,7 +34,7 @@
 				<span id="info-fileshare-protocol" class="config-help-info">
 					Choose the type corresponding to the file sharing protocol used on the remote host.
 					Note that NFS mounts that fail can cause up to a 2 minute timeout. This screen will appear to hang when this happens.
-                </span>
+				</span>
 			</div>
 
 			<label class="control-label" id="server-label" for="address">Path</label>
@@ -48,7 +48,7 @@
 					SCAN generates a list of paths to SMB or NFS shares found on the network.
 					A path consists of the host or IP address followed by a forward slash followed by the share name
 					for example SomeHost/ShareName.
-                </span>
+				</span>
 				<div id="edit-server" $_edit_server_hide">
 					<a id="editserver" data-toggle="modal" href="#manual-server"><button class="btn btn-medium btn-primary config-btn" >Edit</button></a>
 					<span class="config-btn-after">Path manually</span>
@@ -64,13 +64,13 @@
 
 				<label class="control-label" for="nas-pwd">Password</label>
 				<div class="controls">
-					<input  id="nas-pwd" class="config-input-large" type="$_pwd_input_format" pattern="[^'\u0022]+" name="mount[password]" value="$_password" autocomplete="off">
+					<input  id="nas-pwd" class="config-input-large" type="text" pattern="[^'\u0022]+" name="mount[password]" value="" placeholder="$_placeholder[nas_password]" autocomplete="off">
 					<a aria-label="Help" class="config-info-toggle" data-cmd="info-nas-uidpwd" href="#notarget"><i class="fa-regular fa-sharp fa-info-circle"></i></a>
-					<a class="show-hide-password" href="#notarget" data-id="nas-pwd"><i class="fa-regular fa-sharp fa-eye"></i></a>
+					<a data-toggle="modal" href="#clear-nas-password" class="clear-password $_clear_hide[nas_password]"><i class="fa-regular fa-sharp fa-circle-x"></i></a>
 					<span id="info-nas-uidpwd" class="config-help-info">
 						Try userid Guest and a blank password unless your NAS device requires a specific userid/password.
 						Note that single and double quotes are not allowed.
-		            </span>
+					</span>
 				</div>
 			</div>
 
@@ -83,7 +83,7 @@
 				<span id="info-source-name" class="config-help-info">
 					Friendly name (alias) for this remote NAS Source. The name will appear in Library Folder view under the NAS folder.
 					Format is 1-25 characters, alphanumeric, hyphen allowed.
-                </span>
+				</span>
 			</div>
 		</div>
 
@@ -102,7 +102,7 @@
 					<a aria-label="Help" class="config-info-toggle" data-cmd="info-mount-charset" href="#notarget"><i class="fa-regular fa-sharp fa-info-circle"></i></a>
 					<span id="info-mount-charset" class="config-help-info">
 						This setting determines how characters are encoded. The default is UTF-8 which is a multibyte encoding that can represent any Unicode character. ISO 8859-1 is a single-byte encoding that can represent the first 256 Unicode characters. Both encode ASCII exactly the same way.
-                    </span>
+					</span>
 				</div>
 
 				<div id="rw-size" class="$_rw_size_hide">
@@ -112,7 +112,7 @@
 						<a aria-label="Help" class="config-info-toggle" data-cmd="info-mount-rsize" href="#notarget"><i class="fa-regular fa-sharp fa-info-circle"></i></a>
 						<span id="info-mount-rsize" class="config-help-info">
 							Default for this setting is 61440.
-	                    </span>
+						</span>
 					</div>
 
 					<label class="control-label" for="nas-wsize">Wsize</label>
@@ -121,7 +121,7 @@
 						<a aria-label="Help" class="config-info-toggle" data-cmd="info-mount-wsize" href="#notarget"><i class="fa-regular fa-sharp fa-info-circle"></i></a>
 						<span id="info-mount-wsize" class="config-help-info">
 							Default for this setting is 65536.
-	                    </span>
+						</span>
 					</div>
 				</div>
 
@@ -132,7 +132,7 @@
 						Most mount options are auto-negotiated when the mount is attempted but in some cases auto-negotiation cannot determine the correct values and the mount may fail. In this case certain options must be explicitly added or changed. Some of these are listed below.<br>
 						<b>SMB:</b> vers=x.y | sec=ntlm or sec=ntlmssp | cache=strict<br>
 						<b>NFS:</b> vers=x.y | type=nfs2, nfs3 or nfs4
-                    </span>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -168,6 +168,19 @@
 </div>
 
 <form class="form-horizontal" method="post">
+	<div id="clear-nas-password" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="clear-nas-password-label" aria-hidden="true">
+		<div class="modal-header"><button aria-label="Close" type="button" class="close" data-dismiss="modal">&times;</button>
+			<h3>Clear NAS password?</h3>
+		</div>
+		<div class="modal-body"></div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal">Cancel</button>
+			<button class="btn btn-primary btn-submit btn-clear-secret" type="submit" form="config-form" name="clear[nas_password]" value="1">Yes</button>
+		</div>
+	</div>
+</form>
+
+<form class="form-horizontal" method="post">
 	<div id="manual-server" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="manual-server-label" aria-hidden="true">
 		<div class="modal-header"><button aria-label="Close" type="button" class="close" data-dismiss="modal">&times;</button>
 			<h3>Manual path entry</h3>
@@ -179,7 +192,7 @@
 				<input id="mounttype" type="hidden" name="mounttype" value="">
 				<div id="info-manualserver" class="help-block" style="margin-top:5px;">
 					Format is Host/Share or IPaddr/Share. Up to 64 chars, leading slash / not allowed.
-                </div>
+				</div>
 			</div>
 		</div>
 		<div class="modal-footer">
